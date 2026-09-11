@@ -12,6 +12,8 @@ https://github.com/yitsewu/taiwater-hacs
 
 重新整理商店後安裝並啟動 **TaiWater OCR**。預設會隨系統啟動；Supervisor watchdog 會檢查 `/health`。
 
+私人開發版或離線安裝：將 OCR ZIP 中的 `taiwater_ocr` 資料夾放入 HAOS 的 `/addons/`（可透過 Samba／SSH 管理），在商店重新檢查更新，從本機附加元件安裝。此方式的 slug 為 Supervisor 指派的本機 slug，整合仍可自動尋找，不必公開 repository。
+
 TaiWater integration 會從 Home Assistant 的已安裝附加元件清單找出唯一以 `_taiwater_ocr` 結尾的完整 slug，並使用 Home Assistant 的 `hostname_from_addon_slug()` 解析內部 hostname。建議保留 OCR URL 空白，讓 integration 自動產生：
 
 ```text

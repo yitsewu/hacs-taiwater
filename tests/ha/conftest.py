@@ -14,6 +14,12 @@ CUSTOMER_NAME = "測試帳戶"
 ENTRY_NAME = "測試用水"
 
 
+@pytest.fixture
+def mock_recorder_before_hass(recorder_db_url):
+    """依官方 fixture 契約，先準備資料庫再建立 hass。"""
+    return None
+
+
 @pytest.fixture(autouse=True)
 async def ready_recorder(recorder_mock):
     """沿用官方 fixture 初始化 bootstrap 資料與真正的 SQLite Recorder。"""

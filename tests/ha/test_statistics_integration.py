@@ -10,6 +10,8 @@ from custom_components.taiwater.statistics import async_publish_statistics
 
 async def test_recorder_persists_replaces_and_keeps_twd(hass, recorder_mock):
     recorder = recorder_mock
+    if not hass.is_running:
+        await hass.async_start()
     await recorder.async_block_till_done()
     hass.config.currency = "USD"
     entry_id = "01K4VYABC123XYZ"

@@ -1,2 +1,4 @@
 ddddocr==1.5.6
 Pillow==12.1.0
+# NumPy 2.4 raises the x86 baseline to x86-64-v2; support HAOS qemu64 guests.
+numpy==2.3.5

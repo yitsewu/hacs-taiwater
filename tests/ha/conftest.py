@@ -24,8 +24,9 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 def skip_requirements():
     """Keep these tests offline; the integration manifest has no requirements."""
     with patch(
-        "homeassistant.requirements.async_get_integration_with_requirements",
+        "homeassistant.requirements.async_process_requirements",
         new_callable=AsyncMock,
+        return_value=None,
     ):
         yield
 

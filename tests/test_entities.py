@@ -34,6 +34,13 @@ def test_options_normalize_zero_seconds_but_reject_other_seconds() -> None:
     assert errors["query_time"] == "invalid_query_time"
 
 
+def test_omitted_carbon_factor_clears_previous_estimate() -> None:
+    current = {**DEFAULT_OPTIONS, "carbon_factor": 0.15, "carbon_factor_source": "測試來源 2024"}
+    values, errors = _normalize_options({key: value for key, value in current.items() if key != "carbon_factor"}, current)
+    assert errors == {}
+    assert values["carbon_factor"] is None
+
+
 @pytest.mark.parametrize("factor", [math.nan, math.inf, -math.inf])
 def test_options_reject_non_finite_carbon_factor(factor: float) -> None:
     _, errors = _normalize_options(

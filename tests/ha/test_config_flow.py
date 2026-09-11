@@ -4,7 +4,6 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
-from datetime import time
 from hashlib import sha256
 from unittest.mock import MagicMock, patch
 
@@ -141,8 +140,8 @@ async def test_options_ui_time_value_is_persisted_as_hh_mm(hass, config_entry):
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         {
-            **DEFAULT_OPTIONS,
-            "query_time": time(7, 5),
+            **{key: value for key, value in DEFAULT_OPTIONS.items() if value is not None},
+            "query_time": "07:05:00",
         },
     )
 

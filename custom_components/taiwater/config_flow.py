@@ -276,7 +276,8 @@ def _normalize_options(
     if allocation not in _ALLOCATIONS:
         errors["allocation"] = "invalid_allocation"
 
-    factor_input = values.get("carbon_factor")
+    # 空白 optional 欄位會由前端省略；省略即清除舊係數，不保留舊估算。
+    factor_input = user_input.get("carbon_factor")
     carbon_factor: float | None
     if factor_input in (None, ""):
         carbon_factor = None

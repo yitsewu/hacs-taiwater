@@ -74,7 +74,11 @@ class _SameOriginRedirect(urllib.request.HTTPRedirectHandler):
 
 def _official_url(url):
     target = urllib.parse.urlsplit(url)
-    if target.scheme != "https" or target.hostname != "www.water.gov.tw" or target.port not in (None, 443) or target.username:
+    try:
+        port = target.port
+    except ValueError:
+        raise SiteSchemaChanged("原站目的地不符預期") from None
+    if target.scheme != "https" or target.hostname != "www.water.gov.tw" or port not in (None, 443) or target.username is not None:
         raise SiteSchemaChanged("原站目的地不符預期")
 
 
@@ -122,6 +126,10 @@ def recognize(image: bytes, ocr_url: str = "") -> str:
             with urllib.request.build_opener(NoRedirect()).open(request, timeout=30) as response:
                 result = json.loads(response.read(4096))
                 code = result.get("code", "")
+        except urllib.error.HTTPError as error:
+            if error.code == 422:
+                raise QueryError("ocr_failed", ocr_status="failed") from None
+            raise QueryError("ocr_unavailable", ocr_status="unavailable") from None
         except Exception:
             raise QueryError("ocr_unavailable", ocr_status="unavailable") from None
     else:

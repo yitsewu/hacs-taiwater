@@ -85,3 +85,12 @@ class ClientTests(unittest.TestCase):
             client.query("12345678901", "測試")
             client.query("12345678901", "測試")
         self.assertEqual(prepare.call_count, 2)
+
+    def test_ocr_service_rejection_is_failure_not_unavailable(self):
+        for status, expected in ((422, "failed"), (503, "unavailable")):
+            opener = Mock()
+            opener.open.side_effect = client.urllib.error.HTTPError("http://ocr/recognize", status, "fixture", {}, None)
+            with patch.object(client.urllib.request, "build_opener", return_value=opener):
+                with self.assertRaises(client.QueryError) as error:
+                    client.recognize(b"fixture", "http://ocr")
+            self.assertEqual(error.exception.ocr_status, expected)

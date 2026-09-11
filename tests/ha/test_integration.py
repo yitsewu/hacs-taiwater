@@ -52,18 +52,18 @@ async def test_setup_entry_creates_sensor_states_and_keeps_ocr_verification_sepa
     ]
     assert len(sensor_entries) > 30
     assert all(hass.states.get(item.entity_id) is not None for item in sensor_entries)
-    assert hass.states[_entity_id(hass, config_entry, "sensor", "usage_m3")].state == "61"
-    assert hass.states[_entity_id(hass, config_entry, "sensor", "total_twd")].state == "610"
-    assert hass.states[_entity_id(hass, config_entry, "sensor", "period_start")].state == "2026-07-01"
-    assert hass.states[_entity_id(hass, config_entry, "sensor", "period_end")].state == "2026-08-31"
+    assert hass.states.get(_entity_id(hass, config_entry, "sensor", "usage_m3")).state == "61"
+    assert hass.states.get(_entity_id(hass, config_entry, "sensor", "total_twd")).state == "610"
+    assert hass.states.get(_entity_id(hass, config_entry, "sensor", "period_start")).state == "2026-07-01"
+    assert hass.states.get(_entity_id(hass, config_entry, "sensor", "period_end")).state == "2026-08-31"
     assert coordinator.data["ocr_success"] is False
     assert coordinator.data["verification_success"] is True
-    assert hass.states[
+    assert hass.states.get(
         _entity_id(hass, config_entry, "binary_sensor", "ocr_success")
-    ].state == "off"
-    assert hass.states[
+    ).state == "off"
+    assert hass.states.get(
         _entity_id(hass, config_entry, "binary_sensor", "verification_success")
-    ].state == "on"
+    ).state == "on"
 
 
 async def test_latest_button_dispatches_exactly_history_false(
@@ -172,7 +172,7 @@ async def test_disabled_switch_persists_entry_option(
     assert config_entry.options["enabled"] is False
     assert config_entry.runtime_data.data["enabled"] is False
     assert config_entry.runtime_data.data["next_query"] is None
-    assert hass.states[switch_id].state == "off"
+    assert hass.states.get(switch_id).state == "off"
 
 
 async def test_repeated_history_query_is_idempotent(

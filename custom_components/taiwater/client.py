@@ -8,6 +8,7 @@ import io
 import json
 import re
 import secrets
+import ssl
 import threading
 import time
 import urllib.error
@@ -82,11 +83,33 @@ def _official_url(url):
         raise SiteSchemaChanged("原站目的地不符預期")
 
 
+class _OfficialHTTPSHandler(urllib.request.HTTPSHandler):
+    """Only tolerate missing SKI on the official site's legacy certificate chain.
+
+    Python 3.13 enabled strict RFC 5280 checks. Error 86 is missing subject
+    key identifier, not an expired, untrusted, or wrong-host certificate.
+    The retry keeps CA, signature, validity and hostname verification enabled.
+    No application request has been sent when the TLS handshake fails.
+    """
+
+    def https_open(self, request):
+        _official_url(request.full_url)
+        try:
+            return super().https_open(request)
+        except urllib.error.URLError as error:
+            reason = error.reason
+            if not isinstance(reason, ssl.SSLCertVerificationError) or getattr(reason, "verify_code", None) != 86:
+                raise
+            context = ssl.create_default_context()
+            context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+            return urllib.request.HTTPSHandler(context=context).https_open(request)
+
+
 class BoundedClient(DetailClient):
     def __init__(self):
         super().__init__(timeout=30)
         self.opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(self.cookie_jar), _SameOriginRedirect()
+            urllib.request.HTTPCookieProcessor(self.cookie_jar), _SameOriginRedirect(), _OfficialHTTPSHandler()
         )
 
     def _request(self, url, **kwargs):

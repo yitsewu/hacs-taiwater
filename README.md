@@ -1,6 +1,6 @@
 # 台灣自來水公司：Home Assistant／HACS 整合
 
-版本：`0.2.1`，初版測試套件，最低 Home Assistant `2026.9.1`。適用台灣自來水公司水費查詢；不適用臺北自來水事業處。
+版本：`0.2.2`，初版測試套件，最低 Home Assistant `2026.9.1`。適用台灣自來水公司水費查詢；不適用臺北自來水事業處。
 
 輸入水號與戶名後，由 HA 直接查詢官方網站，提供帳單、歷史分攤、排程與狀態感測器。HAOS 可搭配同一個 repository 的「台水 OCR」附加元件，在自己的主機辨識圖片。
 
@@ -112,3 +112,5 @@ Linux／Python 3.14 的完整 HA 測試使用 `pytest-homeassistant-custom-compo
 查詢 parser 由既有本機台水工具整理而來；OCR 依賴透過套件管理器安裝，相關第三方程式遵循原授權。
 
 OCR 附加元件 `0.1.1` 固定 NumPy `2.3.5`，相容未提供 x86-64-v2 指令集的 HAOS 虛擬 CPU；不要求修改 VM CPU 模式。
+
+`0.2.2` 對 `www.water.gov.tw` 的 TLS 憑證鏈缺少 Subject Key Identifier（OpenSSL 86）加入一次相容重試；保留 CA 信任、簽章、效期及 hostname 驗證。不對其他憑證錯誤重試，不修改 HA 全域 TLS 設定。

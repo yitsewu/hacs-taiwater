@@ -2,6 +2,7 @@
 import importlib
 from pathlib import Path
 import sys
+import ssl
 import types
 from unittest.mock import Mock, patch
 import unittest
@@ -106,6 +107,33 @@ class ClientTests(unittest.TestCase):
         for url in ["http://www.water.gov.tw/", "https://evil.example/", "https://www.water.gov.tw.evil.example/", "https://www.water.gov.tw:444/"]:
             with self.assertRaises(client.SiteSchemaChanged):
                 client._official_url(url)
+
+    def test_legacy_ski_retry_keeps_ca_and_hostname_checks(self):
+        error = ssl.SSLCertVerificationError("synthetic certificate")
+        error.verify_code = 86
+        response = object()
+        request = client.urllib.request.Request("https://www.water.gov.tw/ch/")
+        with patch.object(client.urllib.request.HTTPSHandler, "https_open", side_effect=[client.urllib.error.URLError(error), response], autospec=True) as open_https:
+            self.assertIs(client._OfficialHTTPSHandler().https_open(request), response)
+        context = open_https.call_args_list[1].args[0]._context
+        self.assertTrue(context.check_hostname)
+        self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertFalse(context.verify_flags & ssl.VERIFY_X509_STRICT)
+
+    def test_other_certificate_failures_never_retry(self):
+        for code in (10, 18, 20, 62, 85):
+            error = ssl.SSLCertVerificationError("synthetic certificate")
+            error.verify_code = code
+            with patch.object(client.urllib.request.HTTPSHandler, "https_open", side_effect=client.urllib.error.URLError(error)) as open_https:
+                with self.assertRaises(client.urllib.error.URLError):
+                    client._OfficialHTTPSHandler().https_open(client.urllib.request.Request("https://www.water.gov.tw/ch/"))
+            open_https.assert_called_once()
+
+    def test_https_handler_rejects_other_hosts_before_tls(self):
+        with patch.object(client.urllib.request.HTTPSHandler, "https_open") as open_https:
+            with self.assertRaises(client.SiteSchemaChanged):
+                client._OfficialHTTPSHandler().https_open(client.urllib.request.Request("https://example.org/"))
+        open_https.assert_not_called()
 
     def test_native_ocr_unavailable_is_explicit(self):
         with patch.dict(sys.modules, {"ddddocr": None}):

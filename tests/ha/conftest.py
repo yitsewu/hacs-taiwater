@@ -15,6 +15,12 @@ ENTRY_NAME = "測試用水"
 
 
 @pytest.fixture(autouse=True)
+async def ready_recorder(recorder_mock):
+    """沿用官方 fixture 初始化 bootstrap 資料與真正的 SQLite Recorder。"""
+    yield recorder_mock
+
+
+@pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
     """Let Home Assistant discover this repository's custom integration."""
     yield

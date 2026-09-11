@@ -1,0 +1,18 @@
+get_history:
+  name: 讀取已保存的帳單與分攤
+  description: 回傳本機帳单與每月分攤估算，不向原站送出新查詢。
+  fields:
+    config_entry_id:
+      name: 台水帳戶
+      required: true
+      selector:
+        config_entry:
+          integration: taiwater
+    limit:
+      name: 最多回傳帳期數
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 200
+          mode: box

@@ -1,0 +1,22 @@
+name: TaiWater OCR
+version: "0.1.0"
+slug: taiwater_ocr
+description: 在 HAOS 內部辨識台灣自來水驗證碼，不保存圖片或辨識結果。
+url: https://github.com/yitsewu/taiwater-hacs/tree/main/taiwater_ocr
+arch:
+  - amd64
+  - aarch64
+stage: experimental
+startup: services
+boot: auto
+init: true
+host_network: false
+ingress: false
+tmpfs: true
+ports:
+  "8080/tcp": null
+ports_description:
+  "8080/tcp": Internal OCR HTTP API (leave disabled)
+watchdog: http://[HOST]:[PORT:8080]/health
+options: {}
+schema: {}

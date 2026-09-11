@@ -1,0 +1,231 @@
+{
+  "title": "Taiwan Water Corporation",
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Connect Taiwan Water",
+        "description": "The integration first checks the latest bill. It uses the local OCR add-on when available; otherwise it opens a manual CAPTCHA step. Account details and raw responses are never placed in entity IDs or diagnostics.",
+        "data": {
+          "water_id": "Water account number",
+          "customer_name": "Customer name",
+          "name": "Display name",
+          "ocr_url": "Advanced: OCR service URL",
+          "history_limit": "Initial history limit (0 = all)"
+        },
+        "data_description": {
+          "water_id": "11 letters or digits; spaces and hyphens are removed.",
+          "customer_name": "Name used by the official bill detail form.",
+          "name": "Name shown for this integration device.",
+          "ocr_url": "Leave blank to discover the local HAOS add-on or use native OCR when available.",
+          "history_limit": "Choose the maximum history to backfill after the latest bill is verified."
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure account",
+        "description": "Verify the account against a fresh latest-bill query. To use a different water account number, add a separate integration entry.",
+        "data": {
+          "water_id": "Water account number",
+          "customer_name": "Customer name",
+          "name": "Display name",
+          "ocr_url": "Advanced: OCR service URL",
+          "history_limit": "History limit (0 = all)"
+        },
+        "data_description": {
+          "water_id": "11 letters or digits; spaces and hyphens are removed.",
+          "customer_name": "Name used by the official bill detail form.",
+          "name": "Name shown for this integration device.",
+          "ocr_url": "Leave blank to discover the local HAOS add-on or use native OCR when available.",
+          "history_limit": "Choose the maximum history to keep importing after verification."
+        }
+      },
+      "manual": {
+        "title": "Enter CAPTCHA manually",
+        "description": "Enter the code from this one-time image within three minutes.\n\n![CAPTCHA]({captcha_url})",
+        "data": {
+          "code": "CAPTCHA code"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the service. Try again later.",
+      "invalid_auth": "The water account number or customer name was rejected.",
+      "captcha_required": "The CAPTCHA was rejected or expired. Enter the new image.",
+      "ocr_unavailable": "OCR is unavailable. Enter the CAPTCHA manually.",
+      "site_changed": "The official site response has changed and cannot be verified safely.",
+      "invalid_ocr_url": "Enter an HTTP or HTTPS OCR URL without credentials, query, or fragment.",
+      "invalid_water_id": "Enter an 11-character water account number using letters and digits.",
+      "invalid_customer_name": "Enter a valid customer name.",
+      "invalid_name": "Enter a valid display name.",
+      "invalid_captcha": "Enter the 4–8 letter or digit code shown in the image.",
+      "invalid_history_limit": "History limit must be 0 or greater."
+    },
+    "abort": {
+      "already_configured": "This water account is already configured.",
+      "wrong_account": "Reconfiguration cannot change the water account assigned to this entry.",
+      "reconfigure_successful": "The account was verified and updated.",
+      "manual_expired": "The manual CAPTCHA session expired. Start the flow again."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Taiwan Water options",
+        "menu_options": {
+          "settings": "Schedule and calculations",
+          "manual": "Manual CAPTCHA query"
+        }
+      },
+      "settings": {
+        "title": "Schedule and calculations",
+        "data": {
+          "enabled": "Enable scheduled queries",
+          "schedule": "Schedule",
+          "query_time": "Query time",
+          "weekday": "Weekday (Monday = 0)",
+          "monthday": "Day of month",
+          "history_limit": "History limit (0 = all)",
+          "allocation": "Billing-period allocation",
+          "carbon_factor": "Carbon factor (kgCO2e/m³)",
+          "carbon_factor_source": "Carbon factor source",
+          "ocr_url": "Advanced: OCR service URL"
+        },
+        "data_description": {
+          "ocr_url": "Leave blank to discover the local HAOS OCR add-on or use native OCR when available.",
+          "carbon_factor_source": "Required when a carbon factor is configured."
+        }
+      },
+      "manual": {
+        "title": "Run a manual CAPTCHA query",
+        "description": "Enter the code from this one-time image within three minutes. The result goes through the normal history and diagnostics pipeline.\n\n![CAPTCHA]({captcha_url})",
+        "data": {
+          "code": "CAPTCHA code"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the service. Try again later.",
+      "invalid_auth": "The water account number or customer name was rejected.",
+      "captcha_required": "The CAPTCHA was rejected or expired. Enter the new image.",
+      "ocr_unavailable": "OCR is unavailable. Use the displayed manual CAPTCHA.",
+      "site_changed": "The official site response has changed and cannot be verified safely.",
+      "invalid_ocr_url": "Enter an HTTP or HTTPS OCR URL without credentials, query, or fragment.",
+      "invalid_captcha": "Enter the 4–8 letter or digit code shown in the image.",
+      "invalid_query_time": "Enter a valid time.",
+      "invalid_weekday": "Weekday must be from 0 to 6.",
+      "invalid_monthday": "Day of month must be from 1 to 31.",
+      "invalid_history_limit": "History limit must be 0 or greater.",
+      "invalid_schedule": "Select a valid schedule.",
+      "invalid_allocation": "Select a valid allocation method.",
+      "invalid_carbon_factor": "Carbon factor must be 0 or greater.",
+      "carbon_factor_source_required": "Enter the source for the configured carbon factor.",
+      "invalid_carbon_factor_source": "Carbon factor source is too long."
+    },
+    "abort": {
+      "manual_query_successful": "The manual query completed successfully."
+    }
+  },
+  "selector": {
+    "schedule": {
+      "options": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      }
+    },
+    "allocation": {
+      "options": {
+        "days": "Allocate by calendar days",
+        "equal": "Split equally across months"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "latest_bill": { "name": "Latest bill" },
+      "usage_m3": { "name": "Latest bill water usage" },
+      "total_twd": { "name": "Latest bill total" },
+      "carbon_kg": { "name": "Latest bill carbon emissions" },
+      "carbon_source": { "name": "Carbon data source" },
+      "period_start": { "name": "Billing period start" },
+      "period_end": { "name": "Billing period end" },
+      "payment_due": { "name": "Payment due date" },
+      "payment_status": { "name": "Payment status" },
+      "daily_usage": { "name": "Daily water usage" },
+      "average_unit_cost": { "name": "Average unit cost" },
+      "last_attempt": { "name": "Last query attempt" },
+      "last_success": { "name": "Last successful query" },
+      "next_query": { "name": "Next scheduled query" },
+      "last_failure": { "name": "Last failed query" },
+      "query_status": {
+        "name": "Query status",
+        "state": { "never": "Never run", "running": "Running", "success": "Success", "partial": "Partial", "failed": "Failed" }
+      },
+      "ocr_status": {
+        "name": "OCR status",
+        "state": { "not_run": "Not run", "success": "Success", "failed": "Failed", "unavailable": "Unavailable", "not_needed": "Not needed" }
+      },
+      "verification_status": {
+        "name": "Verification status",
+        "state": { "not_run": "Not run", "accepted": "Accepted", "rejected": "Rejected", "unknown": "Unknown" }
+      },
+      "error_code": { "name": "Error code" },
+      "available_count": { "name": "Available bill count" },
+      "imported_count": { "name": "Imported bill count" },
+      "statistics_status": { "name": "Statistics status" },
+      "monthly_water": { "name": "Latest allocated month water usage" },
+      "monthly_cost": { "name": "Latest allocated month cost" },
+      "monthly_carbon": { "name": "Latest allocated month carbon emissions" },
+      "latest_allocated_month": { "name": "Latest allocated month" },
+      "year_water": { "name": "Current year water usage" },
+      "year_cost": { "name": "Current year cost" },
+      "year_carbon": { "name": "Current year carbon emissions" },
+      "year_covered_months": { "name": "Current year covered months" },
+      "fee_92f76062a0": { "name": "Water fee subtotal" },
+      "fee_2168e03efb": { "name": "Collected charges subtotal" },
+      "fee_ddd561fb3f": { "name": "Basic fee" },
+      "fee_42ab920671": { "name": "Clearance and treatment fee" },
+      "fee_aef49f3baf": { "name": "Water usage fee" },
+      "fee_c3a13f154a": { "name": "Clearance and treatment adjustment" },
+      "fee_2b3bc68920": { "name": "Water fee adjustment" },
+      "fee_cc5c43f485": { "name": "Collected-charge subsidy" },
+      "fee_7f28761ba7": { "name": "Protected-area preferential water fee" },
+      "fee_b8688c179c": { "name": "Water conservation and feedback fee" },
+      "fee_e840cf7d57": { "name": "Defense or Veterans Affairs subsidy" },
+      "fee_a7aff058ae": { "name": "Sewer usage fee" },
+      "fee_320b985a89": { "name": "Late payment surcharge" },
+      "fee_a528232203": { "name": "Sewer usage fee adjustment" },
+      "fee_4d59ab23a0": { "name": "Fixed subsidy" },
+      "fee_66aad632a2": { "name": "Engineering improvement fee" },
+      "fee_c1275b8ce9": { "name": "Electronic bill reward" },
+      "fee_433e4293bd": { "name": "Engineering improvement adjustment" },
+      "fee_1548ed5938": { "name": "Operation and maintenance fee" },
+      "fee_0e12ba2c07": { "name": "Operation and maintenance adjustment" },
+      "fee_7b5f6846dd": { "name": "Amount due" },
+      "fee_944b8bf2a9": { "name": "Amount due before subsidy" },
+      "date_e921cebb47": { "name": "Scheduled debit date" },
+      "date_7aac1c3658": { "name": "Payment start date" },
+      "date_14c17f8b61": { "name": "Payment deadline" },
+      "date_ff6a0f35e8": { "name": "Meter reading date" },
+      "date_dcd53ff359": { "name": "Next payment start date" },
+      "date_1ed0a86e38": { "name": "Next meter reading date" }
+    },
+    "binary_sensor": {
+      "last_query_failed": { "name": "Last query failed" },
+      "ocr_success": { "name": "OCR succeeded" },
+      "verification_accepted": { "name": "Customer verification accepted" },
+      "history_complete": { "name": "History complete" }
+    },
+    "button": {
+      "query_latest": { "name": "Query latest bill" },
+      "backfill_history": { "name": "Backfill bill history" }
+    },
+    "switch": {
+      "enabled": { "name": "Scheduled queries" }
+    }
+  },
+  "exceptions": {
+    "query_failed": { "message": "The Taiwan Water query failed ({code})." },
+    "set_enabled_failed": { "message": "Could not change the query schedule ({code})." }
+  }
+}

@@ -1,0 +1,2 @@
+network:
+  "8080/tcp": 內部 OCR HTTP API（預設不對 HAOS 主機公開）

@@ -1,0 +1,43 @@
+name: 驗證台水整合
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pytest pytest-asyncio tzdata Pillow==12.1.0 ruff
+      - run: ruff check custom_components tests scripts taiwater_ocr
+      - run: pytest tests --ignore=tests/ha -q
+      - run: python scripts/package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: taiwater-hacs
+          path: dist/*.zip
+  homeassistant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: pip install pytest-homeassistant-custom-component==0.13.364
+      - run: pytest tests/ha -v
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+  ocr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t taiwater-ocr taiwater_ocr
+      - run: docker run --rm --entrypoint python taiwater-ocr -c "import ddddocr; engine=ddddocr.DdddOcr(show_ad=False); print('OCR model loaded')"

@@ -1,0 +1,13 @@
+{
+  "domain": "taiwater",
+  "name": "台灣自來水公司",
+  "codeowners": ["@yitsewu"],
+  "config_flow": true,
+  "dependencies": ["http", "recorder"],
+  "documentation": "https://github.com/yitsewu/taiwater-hacs",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/yitsewu/taiwater-hacs/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

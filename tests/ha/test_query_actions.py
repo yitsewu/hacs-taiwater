@@ -90,11 +90,17 @@ async def test_targeted_month_updates_only_target_and_keeps_schedule(hass, confi
         query.assert_called_once()
         assert query.call_args.kwargs["requested_month"] == "2026-06"
         await call(hass, config_entry, "query_month", month="2026-06")
+        result["bills"][0]["fields"]["應繳總金額"] = "400元"
+        await call(hass, config_entry, "query_month", month="2026-06")
+        await call(hass, config_entry, "query_month", month="2026-06")
     assert response["bill"]["month"] == "2026-06"
     assert response["query"]["operation"] == "month"
     assert response["query"]["trigger"] == "action"
     assert response["query"]["fetched_count"] == 1
     assert coordinator.bills["2026-08"] == newest
+    assert coordinator.bills["2026-06"]["total_twd"] == 400
+    # 初始化、加入舊帳期、更正金額；相同資料重抓不重建或重複累加。
+    assert mock_statistics.await_count == 3
     assert len(coordinator.bills) == 2
     assert coordinator.data["latest_month"] == "2026-08"
     assert coordinator.data["next_query"] == next_query

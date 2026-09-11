@@ -211,8 +211,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             failure = None
             try:
                 result = await self.hass.async_add_executor_job(job)
-                if self._closing:
-                    return
+                self.data.update(ocr_status=result["ocr_status"], verification_status=result["verification_status"])
                 await self._accept_result(result)
             except client.QueryError as error:
                 failure = error.code
@@ -261,4 +260,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         if self._cancel_timer:
             self._cancel_timer()
             self._cancel_timer = None
+        # 等待已開始的查詢保存結果，避免 reload 與舊 executor 同時查同一水號。
+        async with self._query_lock:
+            pass
         # 不會在 unload 刪帳單或外部統計；重裝之前可從 HA 備份復原。

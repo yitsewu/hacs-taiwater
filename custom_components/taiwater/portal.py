@@ -436,4 +436,3 @@ class TaiWaterClient:
             raise QueryRejected("姓名驗證後沒有可解析的詳細帳單資料。")
         self.last_result = QueryResult(rows=detail_rows)
         return self.last_result
-

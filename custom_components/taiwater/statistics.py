@@ -162,8 +162,10 @@ def _metadata(
     }
 
 
-async def _async_read_last_sum(recorder: object, hass: HomeAssistant, statistic_id: str) -> float | None:
-    """Read the last persisted sum through the recorder executor."""
+async def _async_read_last_statistic(
+    recorder: object, hass: HomeAssistant, statistic_id: str
+) -> tuple[float, float | None] | None:
+    """Read the last persisted timestamp and sum through the recorder executor."""
     result = await recorder.async_add_executor_job(  # type: ignore[attr-defined]
         get_last_statistics,
         hass,
@@ -175,7 +177,8 @@ async def _async_read_last_sum(recorder: object, hass: HomeAssistant, statistic_
     rows = result.get(statistic_id)
     if not rows:
         return None
-    return rows[-1].get("sum")
+    last = rows[-1]
+    return float(last["start"]), last.get("sum")
 
 
 async def _async_verify_reimport(
@@ -186,16 +189,25 @@ async def _async_verify_reimport(
 ) -> None:
     """Prove clear/import before the caller commits its fingerprint."""
     for metric, statistic_id in statistic_ids.items():
-        actual_sum = await _async_read_last_sum(recorder, hass, statistic_id)
+        actual = await _async_read_last_statistic(recorder, hass, statistic_id)
         rows = series.get(metric)
         if not rows:
-            if actual_sum is not None:
+            if actual is not None:
                 raise HomeAssistantError(f"Stale statistics remain after clearing {statistic_id}")
             continue
+        expected_start = rows[-1]["start"].timestamp()
         expected_sum = rows[-1]["sum"]
-        if actual_sum is None or not math.isclose(actual_sum, expected_sum, rel_tol=1e-12, abs_tol=1e-12):
+        if actual is None:
+            raise HomeAssistantError(f"Statistics readback returned no rows for {statistic_id}")
+        actual_start, actual_sum = actual
+        if (
+            not math.isclose(actual_start, expected_start, rel_tol=0, abs_tol=1e-6)
+            or actual_sum is None
+            or not math.isclose(actual_sum, expected_sum, rel_tol=1e-12, abs_tol=1e-12)
+        ):
             raise HomeAssistantError(
-                f"Statistics readback failed for {statistic_id}: expected {expected_sum}, got {actual_sum}"
+                f"Statistics readback failed for {statistic_id}: "
+                f"expected ({expected_start}, {expected_sum}), got ({actual_start}, {actual_sum})"
             )
 
 

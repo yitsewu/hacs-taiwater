@@ -118,7 +118,9 @@ class StatisticsTests(unittest.IsolatedAsyncioTestCase):
         rows = self.persisted.get(statistic_id)
         if not rows:
             return {}
-        return {statistic_id: [dict(rows[-1])]}
+        last = dict(rows[-1])
+        last["start"] = last["start"].timestamp()
+        return {statistic_id: [last]}
 
     async def _publish(self, daily: dict[str, dict[str, object]]) -> str:
         with (
@@ -207,7 +209,7 @@ class StatisticsTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_publish_fails_when_authoritative_readback_does_not_match(self) -> None:
         def wrong_last_sum(hass, count, statistic_id, convert_units, types):
-            return {statistic_id: [{"sum": 999.0}]}
+            return {statistic_id: [{"start": 0.0, "sum": 999.0}]}
 
         with (
             patch.object(statistics, "get_instance", return_value=self.recorder),
@@ -231,6 +233,33 @@ class StatisticsTests(unittest.IsolatedAsyncioTestCase):
             )
 
         self.assertIn(("barrier",), self.events)
+
+    async def test_publish_rejects_same_sum_at_stale_future_timestamp(self) -> None:
+        def stale_last_timestamp(hass, count, statistic_id, convert_units, types):
+            result = self._get_last_statistics(hass, count, statistic_id, convert_units, types)
+            result[statistic_id][-1]["start"] += 3600
+            return result
+
+        with (
+            patch.object(statistics, "get_instance", return_value=self.recorder),
+            patch.object(
+                statistics,
+                "async_add_external_statistics",
+                side_effect=self._capture_import,
+            ),
+            patch.object(
+                statistics,
+                "get_last_statistics",
+                side_effect=stale_last_timestamp,
+            ),
+            self.assertRaises(statistics.HomeAssistantError),
+        ):
+            await statistics.async_publish_statistics(
+                self.hass,
+                "01K4VYABC123XYZ",
+                "住家",
+                {"2026-03-01": {"water": Decimal("1")}},
+            )
 
     async def test_full_reimport_is_idempotent_and_drops_stale_dates(self) -> None:
         daily = {

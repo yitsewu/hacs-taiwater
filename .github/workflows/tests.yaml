@@ -28,16 +28,32 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-      - run: pip install pytest-homeassistant-custom-component==0.13.364
-      - run: pytest tests/ha -v
+          cache: pip
+          cache-dependency-path: .github/requirements-ha.txt
+      - run: pip install -r .github/requirements-ha.txt
+      - run: pytest tests/ha tests/test_entities.py -v
   hassfest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: home-assistant/actions/hassfest@master
   ocr:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t taiwater-ocr taiwater_ocr
-      - run: docker run --rm --entrypoint python taiwater-ocr -c "import ddddocr; engine=ddddocr.DdddOcr(show_ad=False); print('OCR model loaded')"
+      - name: Build OCR app image
+        run: docker build --build-arg BUILD_VERSION=ci --build-arg BUILD_ARCH=${{ matrix.arch }} -t taiwater-ocr taiwater_ocr
+      - name: Start OCR app on CI loopback
+        run: docker run --rm -d --name taiwater-ocr-ci -p 127.0.0.1:18080:8080 taiwater-ocr
+      - name: Run synthetic-image HTTP smoke
+        run: python scripts/ocr_smoke.py --url http://127.0.0.1:18080
+      - name: Stop OCR app
+        if: always()
+        run: docker stop taiwater-ocr-ci || true

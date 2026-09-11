@@ -77,7 +77,11 @@ def _valid_ocr_url(value: str) -> bool:
 
 def _query_error(error: BaseException) -> str:
     code = safe_error_code(error)
-    if code in _FLOW_ERROR_CODES or code in _MANUAL_ERROR_CODES:
+    if code in {"captcha_expired", "captcha_required", "upstream_rejected"}:
+        return "captcha_required"
+    if code in {"ocr_failed", "ocr_unavailable"}:
+        return "ocr_unavailable"
+    if code in _FLOW_ERROR_CODES:
         return code
     if code in {"invalid_response", "unknown"}:
         return "site_changed"
@@ -510,7 +514,7 @@ class TaiWaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         }
         if self._credential_step == "reconfigure":
             entry = self._get_reconfigure_entry()
-            self.hass.config_entries.async_update_entry(
+            return self.async_update_and_abort(
                 entry,
                 title=values[CONF_NAME],
                 data=data,
@@ -521,7 +525,6 @@ class TaiWaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "history_limit": values["history_limit"],
                 },
             )
-            return self.async_abort(reason="reconfigure_successful")
         return self.async_create_entry(
             title=values[CONF_NAME],
             data=data,

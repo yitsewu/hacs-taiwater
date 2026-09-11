@@ -196,6 +196,12 @@ class OCRHTTPTest(unittest.TestCase):
         self.assertEqual(status, 422)
         self.assertEqual(result, {"error": "ocr_failed"})
 
+    def test_unknown_method_uses_controlled_json(self):
+        with RunningServer(FakeService()) as running:
+            status, result = running.request("OPTIONS", "/recognize")
+        self.assertEqual(status, 501)
+        self.assertEqual(result, {"error": "invalid_request"})
+
     def test_requests_never_exceed_worker_limit(self):
         class BlockingService:
             def __init__(self):

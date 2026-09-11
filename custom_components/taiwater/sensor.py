@@ -14,7 +14,6 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
-    SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfVolume
@@ -266,13 +265,13 @@ CORE_SENSORS: tuple[TaiWaterSensorDescription, ...] = (
     TaiWaterSensorDescription(
         key="statistics_status", translation_key="statistics_status"
     ),
-    # 以下為 coordinator 已按月份／年度配置好的獨立 LTS entities。
+    # 以下為 coordinator 已配置好的目前月／年摘要；長期統計由 statistics.py
+    # 另行發布，這些會切換月份／年度的顯示值不宣告 state class。
     TaiWaterSensorDescription(
         key="monthly_water",
         translation_key="monthly_water",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(
@@ -280,28 +279,23 @@ CORE_SENSORS: tuple[TaiWaterSensorDescription, ...] = (
         translation_key="monthly_cost",
         device_class=SensorDeviceClass.MONETARY,
         native_unit_of_measurement="TWD",
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(
         key="monthly_carbon",
         translation_key="monthly_carbon",
         native_unit_of_measurement="kgCO2e",
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(
         key="latest_allocated_month",
         translation_key="latest_allocated_month",
-        device_class=SensorDeviceClass.DATE,
-        value_fn=_date,
     ),
     TaiWaterSensorDescription(
         key="year_water",
         translation_key="year_water",
         device_class=SensorDeviceClass.WATER,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(
@@ -309,14 +303,12 @@ CORE_SENSORS: tuple[TaiWaterSensorDescription, ...] = (
         translation_key="year_cost",
         device_class=SensorDeviceClass.MONETARY,
         native_unit_of_measurement="TWD",
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(
         key="year_carbon",
         translation_key="year_carbon",
         native_unit_of_measurement="kgCO2e",
-        state_class=SensorStateClass.TOTAL,
         value_fn=_number,
     ),
     TaiWaterSensorDescription(

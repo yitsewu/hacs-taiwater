@@ -52,35 +52,11 @@ python -m unittest discover -s tests -p 'test_ocr_server.py' -v
 
 ## Docker smoke test
 
-以下 CI smoke test 建置 image、在 container 內產生固定高對比數字圖片，再呼叫本機服務。它只驗證 ddddocr 能回傳 4–8 位英數字，不把通用 OCR 對合成字型的精確分類當成準確率測試。
+以下 CI smoke test 建置 image、只在 CI loopback 映射 port，並由 `scripts/ocr_smoke.py` 在記憶體產生固定高對比數字 PNG 後呼叫 HTTP 服務。它只驗證 ddddocr 能回傳 4–8 位英數字，不把通用 OCR 對合成字型的精確分類當成準確率測試。
 
 ```bash
 docker build --build-arg BUILD_VERSION=0.1.0 --build-arg BUILD_ARCH=amd64 -t taiwater-ocr-smoke ./taiwater_ocr
-container_id="$(docker run --rm -d taiwater-ocr-smoke)"
+container_id="$(docker run --rm -d -p 127.0.0.1:18080:8080 taiwater-ocr-smoke)"
 trap 'docker stop "$container_id" >/dev/null 2>&1 || true' EXIT
-for attempt in $(seq 1 60); do
-  docker exec "$container_id" python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=1).read()" && break
-  sleep 1
-done
-docker exec -i "$container_id" python - <<'PY'
-import io
-import json
-import re
-import urllib.request
-from PIL import Image, ImageDraw, ImageFont
-
-image = Image.new("RGB", (260, 100), "white")
-font = ImageFont.load_default(size=64)
-ImageDraw.Draw(image).text((20, 12), "12345", fill="black", font=font)
-payload = io.BytesIO()
-image.save(payload, format="PNG")
-request = urllib.request.Request(
-    "http://127.0.0.1:8080/recognize",
-    data=payload.getvalue(),
-    headers={"Content-Type": "application/octet-stream"},
-    method="POST",
-)
-result = json.load(urllib.request.urlopen(request, timeout=15))
-assert re.fullmatch(r"[A-Za-z0-9]{4,8}", result["code"]), result
-PY
+python scripts/ocr_smoke.py --url http://127.0.0.1:18080
 ```

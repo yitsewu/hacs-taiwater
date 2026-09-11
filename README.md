@@ -35,7 +35,7 @@
 - 最新帳期、用水度數、原始應繳總金額、原站費用細項及可取得的日期。
 - 最新有資料月份的分攤用水／費用／碳排、年度已取得資料合計與涵蓋月份數。
 - 上次查詢時間、上次成功時間、上次失敗時間、下次排程時間。
-- 查詢結果、OCR 辨識結果、原站驗證結果、錯誤碼、已匯入與可查帳期數、历史完整性與統計寫入狀態。
+- 查詢結果、OCR 辨識結果、原站驗證結果、錯誤碼、已匯入與可查帳期數、歷史完整性與統計寫入狀態。
 - 「立即查詢最新一期」、「補抓歷史」按鈕與「自動查詢」開關。
 - 若原站提供付款狀態就顯示；沒有資料時為未知，不推測已繳或未繳。
 
@@ -79,6 +79,6 @@ ruff check custom_components tests scripts taiwater_ocr
 python scripts/package.py
 ```
 
-Linux／Python 3.14 的完整 HA 測試使用 `pytest-homeassistant-custom-component==0.13.364`，執行 `pytest tests/ha -v`。CI 同時驗證 HACS 目錄結構、hassfest、OCR container 模型載入與去識別測試。測試不登入真實帳戶，不保存原始帳单。
+Linux／Python 3.14 的完整 HA 測試使用 `pytest-homeassistant-custom-component==0.13.364`，執行 `pytest tests/ha -v`。CI 同時驗證 HACS 目錄結構、hassfest、OCR container 模型載入與去識別測試。測試不登入真實帳戶，不保存原始帳單。
 
 查詢 parser 由既有本機台水工具整理而來；OCR 依賴透過套件管理器安裝，相關第三方程式遵循原授權。

@@ -122,6 +122,14 @@ class OCRRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         return
 
+    def send_error(self, code: int, message=None, explain=None) -> None:
+        """Replace BaseHTTPRequestHandler HTML errors with a fixed JSON body."""
+        try:
+            status = HTTPStatus(code)
+        except ValueError:
+            status = HTTPStatus.BAD_REQUEST
+        self._send_json(status, {"error": "invalid_request"})
+
     def handle_expect_100(self) -> bool:
         self._send_error(HTTPStatus.EXPECTATION_FAILED, "expectation_failed")
         return False
@@ -248,6 +256,9 @@ class BoundedThreadingHTTPServer(ThreadingMixIn, HTTPServer):
             super().process_request_thread(request, client_address)
         finally:
             self._workers.release()
+
+    def handle_error(self, request, client_address) -> None:
+        return
 
 
 def make_server(host: str, port: int, service: OCRService) -> BoundedThreadingHTTPServer:

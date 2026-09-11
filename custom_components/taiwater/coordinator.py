@@ -8,6 +8,8 @@ from calendar import monthrange
 from decimal import Decimal
 from functools import partial
 import logging
+import time
+from uuid import uuid4
 
 from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.storage import Store
@@ -42,6 +44,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.bills = {}
         self.monthly = {}
         self.available_months = []
+        self.query_history = []
         self.store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}", private=True)
         self._query_lock = asyncio.Lock()
         self._cancel_timer = None
@@ -62,14 +65,24 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             self.bills = saved.get("bills", {})
             self.available_months = saved.get("available_months", [])
             self.data.update(saved.get("status", {}))
+            self.query_history = saved.get("query_history", [])[-100:]
+            interrupted_at = None
+            for record in self.query_history:
+                if record.get("status") == "running":
+                    interrupted_at = interrupted_at or client.now()
+                    record.update(status="interrupted", error_code="interrupted",
+                                  finished_at=interrupted_at, duration_seconds=None)
             if self.data.get("query_status") == "running":
-                self.data.update(query_status="failed", query_success=False, error_code="interrupted")
+                self.data.update(query_status="failed", query_success=False, error_code="interrupted",
+                                 last_failure=interrupted_at or client.now())
         self.data["enabled"] = self.options["enabled"]
         self._rebuild()
         seed = self.hass.data.get(DOMAIN, {}).get("seeds", {}).pop(self.entry.unique_id, None)
         if seed:
             self.data["last_attempt"] = seed.get("started_at", seed["finished_at"])
+            record = self._begin_record("setup", "initial", None, self.data["last_attempt"])
             await self._accept_result(seed)
+            self._finish_record(record, seed["finished_at"], None, len(seed["bills"]))
         elif self.bills:
             await self._publish_statistics()
         self._schedule()
@@ -80,7 +93,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         # 首次回填優先；沒有新需求時重啟只恢復排程，不立即重抓所有帳單。
         if not self.data["history_complete"]:
             self._initial_task = self.entry.async_create_background_task(
-                self.hass, self.async_query(history=True, refresh_history=False, raise_errors=False),
+                self.hass, self.async_query(history=True, refresh_history=False, raise_errors=False, trigger="initial"),
                 "taiwater_initial_history"
             )
 
@@ -184,20 +197,42 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.data["ocr_success"] = True if ocr == "success" else False if ocr in {"failed", "unavailable"} else None
         self.data["verification_success"] = True if verification == "accepted" else False if verification == "rejected" else None
 
-    async def async_query(self, history=False, *, refresh_history=True, raise_errors=True):
+    async def async_query(self, history=False, *, refresh_history=True, raise_errors=True, trigger="button", requested_month=None):
+        if requested_month is not None:
+            client.validate_month(requested_month)
         url = await async_resolve_ocr_url(self.hass, self.options.get("ocr_url", self.entry.data.get("ocr_url", "")))
         # 普通排程補齊缺期；手動最新一期只抓最新；歷史按鈕可重抓更正資料。
         limit = self.options["history_limit"] if history else None
         job = partial(client.query, self.entry.data["water_id"], self.entry.data["customer_name"],
                       ocr_url=url, history_limit=limit, known_months=tuple(self.bills), refresh_history=refresh_history)
-        await self._run(job, raise_errors=raise_errors)
+        if requested_month is not None:
+            job.keywords["requested_month"] = requested_month
+        return await self._run(job, raise_errors=raise_errors, trigger=trigger,
+                               operation="month" if requested_month else "history" if history else "latest",
+                               requested_month=requested_month)
 
     async def async_submit_manual(self, challenge, code):
         job = partial(client.submit_manual, challenge, self.entry.data["water_id"], self.entry.data["customer_name"],
                       code, history_limit=self.options["history_limit"], refresh_history=True)
-        await self._run(job)
+        return await self._run(job, trigger="manual", operation="history")
 
-    async def _run(self, job, *, raise_errors=True):
+    def _begin_record(self, trigger, operation, requested_month, started_at):
+        record = {"query_id": uuid4().hex, "trigger": trigger, "operation": operation,
+                  "requested_month": requested_month, "started_at": started_at,
+                  "finished_at": None, "duration_seconds": None, "status": "running",
+                  "ocr_status": "not_run", "verification_status": "not_run",
+                  "error_code": None, "fetched_count": 0}
+        self.query_history.append(record)
+        self.query_history = self.query_history[-100:]
+        return record
+
+    def _finish_record(self, record, finished_at, duration, fetched_count):
+        record.update(finished_at=finished_at, duration_seconds=duration,
+                      status=self.data["query_status"], ocr_status=self.data["ocr_status"],
+                      verification_status=self.data["verification_status"],
+                      error_code=self.data["error_code"], fetched_count=fetched_count)
+
+    async def _run(self, job, *, raise_errors=True, trigger="button", operation="latest", requested_month=None):
         if self._closing or self._query_lock.locked():
             if raise_errors:
                 raise client.QueryError("busy")
@@ -206,12 +241,19 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             self.data.update(last_attempt=client.now(), query_status="running", query_success=None,
                              ocr_status="not_run", verification_status="not_run", ocr_success=None,
                              verification_success=None, error_code=None)
+            started = time.monotonic()
+            record = self._begin_record(trigger, operation, requested_month, self.data["last_attempt"])
             self.async_set_updated_data(dict(self.data))
             await self._save()
             failure = None
+            result = None
+            fetched_count = 0
             try:
                 result = await self.hass.async_add_executor_job(job)
                 self.data.update(ocr_status=result["ocr_status"], verification_status=result["verification_status"])
+                fetched_count = len(result["bills"])
+                if requested_month is not None and [bill["month"] for bill in result["bills"]] != [requested_month]:
+                    raise ValueError("Unexpected requested month response")
                 await self._accept_result(result)
             except client.QueryError as error:
                 failure = error.code
@@ -223,14 +265,18 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             if failure:
                 self.data.update(query_status="failed", query_success=False, error_code=failure, last_failure=client.now())
                 self._diagnostic_flags()
+            finished = self.data["last_failure"] if failure else result["finished_at"]
+            self._finish_record(record, finished, round(time.monotonic() - started, 3),
+                                fetched_count)
             self.async_set_updated_data(dict(self.data))
             await self._save()
             if failure and raise_errors:
                 raise client.QueryError(failure, ocr_status=self.data["ocr_status"], verification_status=self.data["verification_status"])
+            return dict(record)
 
     async def _save(self):
         await self.store.async_save({"bills": self.bills, "available_months": self.available_months,
-                                     "status": serializable(self.data)})
+                                     "status": serializable(self.data), "query_history": self.query_history})
 
     def _schedule(self):
         if self._cancel_timer:
@@ -245,7 +291,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
     async def _scheduled(self, _now):
         self._schedule()  # 先排下一次，手動查詢不改動日曆排程。
         self.async_set_updated_data(dict(self.data))
-        await self.async_query(history=True, refresh_history=False, raise_errors=False)
+        await self.async_query(history=True, refresh_history=False, raise_errors=False, trigger="schedule")
 
     async def async_set_enabled(self, enabled):
         self.options["enabled"] = bool(enabled)

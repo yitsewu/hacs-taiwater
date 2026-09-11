@@ -165,7 +165,18 @@ def _bill(detail):
     return {"month": _month(detail["selected_month"]), "fields": safe_fields(detail["fields"]), "fetched_at": now()}
 
 
-def submit_manual(challenge, water_id, customer_name, code, *, history_limit=0, known_months=(), refresh_history=False, ocr_status="not_needed"):
+def validate_month(month):
+    """帳期使用西元 YYYY-MM，限原站三位民國年可表示範圍。"""
+    if not isinstance(month, str) or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", month):
+        raise QueryError("invalid_month")
+    year = int(month[:4]) - 1911
+    if not 1 <= year <= 999:
+        raise QueryError("invalid_month")
+    return f"T{year:03d}{month[5:]}"
+
+
+def submit_manual(challenge, water_id, customer_name, code, *, history_limit=0, known_months=(), refresh_history=False, ocr_status="not_needed", requested_month=None):
+    requested = validate_month(requested_month) if requested_month is not None else None
     if challenge.used or time.monotonic() - challenge.created_at > 180:
         raise QueryError("captcha_expired", ocr_status=ocr_status)
     challenge.used = True
@@ -176,9 +187,13 @@ def submit_manual(challenge, water_id, customer_name, code, *, history_limit=0, 
         verified = "accepted"
         detail = client.open_details(customer_name, water_id)
         available = sorted(detail["months"], key=lambda item: item["value"], reverse=True)
-        latest = available[0]["value"]
+        latest = requested or available[0]["value"]
+        if latest not in {item["value"] for item in available}:
+            raise QueryError("month_unavailable", ocr_status=ocr_status, verification_status=verified)
         if detail["selected_month"] != latest:
             detail = client.select_month(latest)
+        if detail["selected_month"] != latest:
+            raise SiteSchemaChanged("Unexpected selected month")
         bills = [_bill(detail)]
     except QueryRejected as exc:
         rejected = "rejected" if "驗證碼" in str(exc) else "unknown"
@@ -192,7 +207,7 @@ def submit_manual(challenge, water_id, customer_name, code, *, history_limit=0, 
     result = {"bills": bills, "available_months": [_month(i["value"]) for i in available],
               "ocr_status": ocr_status, "verification_status": verified, "error_code": None,
               "status": "success", "finished_at": now()}
-    if history_limit is not None:
+    if history_limit is not None and requested is None:
         selected = available if history_limit == 0 else available[:history_limit]
         for item in selected:
             month = _month(item["value"])
@@ -209,11 +224,13 @@ def submit_manual(challenge, water_id, customer_name, code, *, history_limit=0, 
     return result
 
 
-def query(water_id, customer_name, *, ocr_url="", history_limit=None, known_months=(), refresh_history=False):
+def query(water_id, customer_name, *, ocr_url="", history_limit=None, known_months=(), refresh_history=False, requested_month=None):
+    if requested_month is not None:
+        validate_month(requested_month)
     challenge = prepare_manual()
     code = recognize(challenge.image, ocr_url)
     return submit_manual(challenge, water_id, customer_name, code, history_limit=history_limit,
-                         known_months=known_months, refresh_history=refresh_history, ocr_status="success")
+                         known_months=known_months, refresh_history=refresh_history, ocr_status="success", requested_month=requested_month)
 
 
 def validate_credentials(water_id, customer_name, ocr_url=""):

@@ -184,5 +184,31 @@
   "exceptions": {
     "query_failed": { "message": "台水查詢失敗（{code}）。" },
     "set_enabled_failed": { "message": "無法變更查詢排程（{code}）。" }
+  },
+  "services": {
+  "get_query_history": {
+    "name": "讀取最近查詢紀錄",
+    "description": "讀取最近 100 次內的去敏查詢結果，不連線台水。",
+    "fields": {
+      "config_entry_id": {
+        "name": "台水帳戶"
+      },
+      "limit": {
+        "name": "最多回傳紀錄數"
+      }
+    }
+  },
+  "query_month": {
+    "name": "補抓指定帳期",
+    "description": "重新取得原站提供的指定帳期，保留其他帳單與排程。",
+    "fields": {
+      "config_entry_id": {
+        "name": "台水帳戶"
+      },
+      "month": {
+        "name": "帳期（YYYY-MM）"
+      }
+    }
   }
+}
 }

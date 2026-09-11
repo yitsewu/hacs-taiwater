@@ -227,5 +227,31 @@
   "exceptions": {
     "query_failed": { "message": "The Taiwan Water query failed ({code})." },
     "set_enabled_failed": { "message": "Could not change the query schedule ({code})." }
+  },
+  "services": {
+  "get_query_history": {
+    "name": "Read recent query history",
+    "description": "Read up to 100 retained query results without contacting Taiwan Water.",
+    "fields": {
+      "config_entry_id": {
+        "name": "Taiwan Water account"
+      },
+      "limit": {
+        "name": "Maximum records"
+      }
+    }
+  },
+  "query_month": {
+    "name": "Refresh a specific bill period",
+    "description": "Refresh one available bill period, preserving other bills and the schedule.",
+    "fields": {
+      "config_entry_id": {
+        "name": "Taiwan Water account"
+      },
+      "month": {
+        "name": "Bill period (YYYY-MM)"
+      }
+    }
   }
+}
 }

@@ -1,6 +1,6 @@
 # 台灣自來水公司：Home Assistant／HACS 整合
 
-版本：`0.1.0`，初版測試套件，最低 Home Assistant `2026.9.1`。適用台灣自來水公司水費查詢；不適用臺北自來水事業處。
+版本：`0.2.0`，初版測試套件，最低 Home Assistant `2026.9.1`。適用台灣自來水公司水費查詢；不適用臺北自來水事業處。
 
 輸入水號與戶名後，由 HA 直接查詢官方網站，提供帳單、歷史分攤、排程與狀態感測器。HAOS 可搭配同一個 repository 的「台水 OCR」附加元件，在自己的主機辨識圖片。
 
@@ -40,6 +40,34 @@
 - 若原站提供付款狀態就顯示；沒有資料時為未知，不推測已繳或未繳。
 
 OCR 的 `success` 只表示辨識出格式有效的文字，不等於原站接受。原站明確拒絕驗證碼時，會同時出現「OCR 成功」與「驗證失敗」。網路失敗或回應不明時，不捏造驗證結果。完整查詢失敗不更新最後成功時間；歷史部分失敗保留已取得的有效帳單並標示 `partial`。
+
+## 查詢紀錄與指定帳期補抓
+
+在 HA「開發者工具 → 動作」可使用以下動作；也可加入自己的 script／自動化。`config_entry_id` 在介面選擇台水帳戶，YAML 範例則替換為該整合的設定項目 ID。
+
+```yaml
+action: taiwater.get_query_history
+data:
+  config_entry_id: YOUR_CONFIG_ENTRY_ID
+  limit: 25
+response_variable: query_history
+```
+
+每個帳戶保留最近 **100 次**查詢，最新紀錄在前。記錄查詢 ID、觸發方式（setup／initial／schedule／button／manual／action）、操作（initial／latest／history／month）、指定帳期、開始／完成時間、耗時秒數、結果、OCR 結果、台水驗證結果、固定錯誤碼與取得帳單數。`fetched_count` 是取回數量，不代表通過格式檢查或新增的帳單數。
+
+紀錄隨 HA 重啟保留；未完成的查詢標成 `interrupted`，完成時間是啟動時辨識中斷的時間，未知耗時留空。首次設定匯入的結果也會記錄，但未量測的耗時留空。升級前的逐次歷程無法回補。無效輸入或忙碌時拒絕的請求尚未開始查詢，不增加紀錄。讀取紀錄不連線台水，也不保存姓名、水號、驗證碼文字／圖片、Cookie 或原始錯誤內容。
+
+```yaml
+action: taiwater.query_month
+data:
+  config_entry_id: YOUR_CONFIG_ENTRY_ID
+  month: "2026-08"
+response_variable: queried_bill
+```
+
+指定的是**原站帳期**，不是分攤後的月份。可從 `taiwater.get_history` 的 `available_months` 取得最近已知清單。此動作重新建立工作階段、執行 OCR／驗證，再取得指定帳期；原站驗證流程可能先回傳預選帳期，但只保存要求的那一期。不需要重抓其他歷史，也不改動下次排程。
+
+回應包含 `query` 查詢紀錄及 `bill` 正規化帳單；`response_variable` 可省略。同帳期更新後會重建本整合的分攤統計，不重複累加。不存在的帳期回報 `month_unavailable`；查詢失敗保留原帳單，原因可由查詢紀錄讀取。OCR 失敗沿用既有人工查詢備援。
 
 ## 費用、碳排與歷史統計
 

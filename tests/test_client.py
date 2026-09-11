@@ -46,6 +46,39 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(result["status"], "partial")
         self.assertEqual(result["bills"][0]["month"], "2026-09")
 
+    def test_requested_month_fetches_only_target_in_same_session(self):
+        challenge = self.challenge()
+        challenge.details.open_details.return_value = detail()
+        result = client.submit_manual(challenge, "12345678901", "測試", "1234", requested_month="2026-07")
+        self.assertEqual([bill["month"] for bill in result["bills"]], ["2026-07"])
+        challenge.details.select_month.assert_called_once_with("T11507")
+        self.assertEqual(result["available_months"], ["2026-09", "2026-07"])
+
+    def test_unavailable_month_does_not_return_latest_as_requested(self):
+        challenge = self.challenge()
+        with self.assertRaises(client.QueryError) as error:
+            client.submit_manual(challenge, "12345678901", "測試", "1234", requested_month="2026-06")
+        self.assertEqual(error.exception.code, "month_unavailable")
+        self.assertEqual(error.exception.verification_status, "accepted")
+        challenge.details.select_month.assert_not_called()
+
+    def test_mismatched_selected_month_is_rejected(self):
+        challenge = self.challenge()
+        challenge.details.select_month.side_effect = lambda code: detail("T11507")
+        with self.assertRaises(client.QueryError) as error:
+            client.submit_manual(challenge, "12345678901", "測試", "1234", requested_month="2026-09")
+        self.assertEqual(error.exception.code, "site_changed")
+
+    def test_invalid_month_does_not_start_network(self):
+        for month in ("2026-13", "2026-7", "1911-01", "2911-01", "2026-07\n", None):
+            if month is None:
+                continue
+            with patch.object(client, "prepare_manual") as prepare:
+                with self.assertRaises(client.QueryError) as error:
+                    client.query("12345678901", "測試", requested_month=month)
+            self.assertEqual(error.exception.code, "invalid_month")
+            prepare.assert_not_called()
+
     def test_recognized_code_not_equal_accepted_code(self):
         challenge = self.challenge()
         challenge.details.submit_query.side_effect = client.QueryRejected("驗證碼錯誤或已過期，請重新取得。")

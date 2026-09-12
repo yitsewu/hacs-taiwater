@@ -9,6 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .const import DEFAULT_OPTIONS
+from .native_ocr import runtime_info
 
 _SAFE_CODE = re.compile(r"^[a-z0-9_]{1,64}$")
 _STATUS_KEYS = (
@@ -62,6 +63,7 @@ async def async_get_config_entry_diagnostics(
     )
 
     return {
+        "local_ocr": await hass.async_add_executor_job(runtime_info),
         "configuration": {
             "schedule": options.get("schedule"),
             "query_time": options.get("query_time"),

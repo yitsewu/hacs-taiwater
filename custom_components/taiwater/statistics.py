@@ -46,10 +46,10 @@ _METRICS: Final = {
         VolumeConverter.UNIT_CLASS,
         UnitOfVolume.CUBIC_METERS,
     ),
-    "cost": ("cost", "台水費用（分攤估算）", None, "TWD"),
+    "cost": ("cost", "總費用", None, "TWD"),
     "carbon": (
         "carbon",
-        "台水碳排 kgCO2e（分攤估算）",
+        "總碳排量 kgCO2e",
         MassConverter.UNIT_CLASS,
         UnitOfMass.KILOGRAMS,
     ),

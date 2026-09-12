@@ -217,7 +217,7 @@
     "binary_sensor": {
       "last_query_failed": { "name": "Last query failed" },
       "ocr_success": { "name": "OCR succeeded" },
-      "verification_accepted": { "name": "Customer verification accepted" },
+      "verification_accepted": { "name": "Taiwan Water verification accepted" },
       "history_complete": { "name": "History complete" }
     },
     "button": {

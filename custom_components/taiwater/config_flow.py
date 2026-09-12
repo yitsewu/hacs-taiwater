@@ -319,6 +319,7 @@ class TaiWaterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """台水設定流程。"""
 
     VERSION = 1
+    MINOR_VERSION = 2
 
     def __init__(self) -> None:
         self._pending_data: dict[str, Any] | None = None

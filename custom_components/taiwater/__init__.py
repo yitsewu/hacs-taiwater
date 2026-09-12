@@ -7,6 +7,17 @@ from .coordinator import TaiWaterCoordinator
 from .services import async_register_services
 
 
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Keep legacy accounts on their old day-based default, preserving all IDs."""
+    if entry.version != 1:
+        return False
+    if entry.minor_version < 2:
+        options = dict(entry.options)
+        options.setdefault("allocation", "days")
+        hass.config_entries.async_update_entry(entry, options=options, minor_version=2)
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = TaiWaterCoordinator(hass, entry)
     entry.runtime_data = coordinator

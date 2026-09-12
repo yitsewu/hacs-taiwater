@@ -104,3 +104,22 @@ class LocalOCR:
 
 
 ENGINE = LocalOCR()
+
+
+def runtime_info():
+    """Executor-only diagnostic metadata, never image/text/account data."""
+    import importlib.metadata
+    import platform
+
+    info = {"engine": "numpy", "loaded": ENGINE._model is not None,
+            "python": platform.python_version(), "architecture": platform.machine()}
+    for name in ("numpy", "Pillow"):
+        try:
+            info[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            info[name] = None
+    if platform.machine() in {"x86_64", "AMD64"} and Path("/proc/cpuinfo").exists():
+        flags = next((line.split(":", 1)[1].split() for line in Path("/proc/cpuinfo").read_text().splitlines()
+                      if line.startswith("flags")), [])
+        info["cpu_features"] = {key: key in flags for key in ("sse2", "pni", "sse4_1", "sse4_2", "avx")}
+    return info

@@ -217,7 +217,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.data.update(query_status=result["status"], query_success=successful,
                          ocr_status=result["ocr_status"], verification_status=result["verification_status"],
                          error_code=result.get("error_code"))
-        self.data["ocr_backend"] = result.get("ocr_backend", self.data.get("ocr_backend", "not_run"))
+        self.data["ocr_backend"] = result.get("ocr_backend", "manual" if result["ocr_status"] == "not_needed" else self.data.get("ocr_backend", "not_run"))
         if successful:
             self.data["last_success"] = finished
         else:

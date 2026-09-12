@@ -194,14 +194,14 @@ class StatisticsTests(unittest.IsolatedAsyncioTestCase):
         cost_meta, cost_rows = imports["taiwater:01k4vyabc123xyz_cost"][1:]
         self.assertEqual(cost_meta["unit_class"], None)
         self.assertEqual(cost_meta["unit_of_measurement"], "TWD")
-        self.assertEqual(cost_meta["name"], "住家 台水費用（分攤估算）")
+        self.assertEqual(cost_meta["name"], "住家 總費用")
         self.assertEqual(len(cost_rows), 25)
         self.assertEqual(cost_rows[-1]["sum"], 48.0)
 
         carbon_meta, carbon_rows = imports["taiwater:01k4vyabc123xyz_carbon"][1:]
         self.assertEqual(carbon_meta["unit_class"], "mass")
         self.assertEqual(carbon_meta["unit_of_measurement"], "kg")
-        self.assertEqual(carbon_meta["name"], "住家 台水碳排 kgCO2e（分攤估算）")
+        self.assertEqual(carbon_meta["name"], "住家 總碳排量 kgCO2e")
         self.assertEqual(carbon_rows[-1]["sum"], 1.2)
 
     async def test_cost_unit_is_twd_even_when_home_assistant_currency_is_usd(self) -> None:

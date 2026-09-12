@@ -1,5 +1,12 @@
 # 更新紀錄
 
+## 0.4.1
+
+- 新增 HACS 官方驗證與台灣地區設定，準備申請預設目錄收錄。
+- 統一新儲存庫 `yitsewu/hacs-taiwater` 的文件與套件連結。
+- 簡化帳戶設定文字與 README；沿用內建 OCR、帳單歷史及既有帳戶設定。
+
+
 ## 0.4.0
 
 - OCR 改為整合內建 NumPy 推論及 MIT 模型，HA requirements 使用與 Core 2026.9.1 相同的 NumPy／Pillow。

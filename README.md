@@ -1,6 +1,6 @@
 # HACS - Taiwan Water 
 
-[![Open your Home Assistant instance and open a repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=taiwater-hacs&category=integration)
+[![Open your Home Assistant instance and open a repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=hacs-taiwater&category=integration)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -24,12 +24,12 @@
 
 **HACS**
 
-1. 先安裝 HACS，點頁首按鈕開啟儲存庫；也可在 HACS「自訂儲存庫」加入 `https://github.com/yitsewu/taiwater-hacs`，類型選「整合」。
+1. 先安裝 HACS，點頁首按鈕開啟儲存庫；也可在 HACS「自訂儲存庫」加入 `https://github.com/yitsewu/hacs-taiwater`，類型選「整合」。
 2. 下載整合，重新啟動 Home Assistant。
 
 **ZIP 安裝**
 
-1. 從 [Releases](https://github.com/yitsewu/taiwater-hacs/releases) 下載 `taiwater-版本.zip`。
+1. 從 [Releases](https://github.com/yitsewu/hacs-taiwater/releases) 下載 `taiwater-版本.zip`。
 2. 將壓縮檔中的完整 `custom_components/taiwater` 資料夾放入 HA 的 `/config/custom_components/`，重新啟動 HA。
 
 更新前先備份 HA；更新後保留既有帳戶與歷史，不需重填水號、戶名。
@@ -51,7 +51,7 @@
 
 ### 問題回報
 
-回報問題請到 [Issues](https://github.com/yitsewu/taiwater-hacs/issues)，勿附上水號、戶名、Cookie、驗證碼或原始帳單。
+回報問題請到 [Issues](https://github.com/yitsewu/hacs-taiwater/issues)，勿附上水號、戶名、Cookie、驗證碼或原始帳單。
 
 ### 資料來源
 

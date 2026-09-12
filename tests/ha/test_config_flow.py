@@ -125,6 +125,30 @@ async def test_ocr_failure_falls_back_to_manual_and_seeds_accepted_result(
     )
 
 
+async def test_builtin_load_failure_reaches_manual_flow(hass, mock_setup_integration):
+    from custom_components.taiwater import native_ocr
+
+    challenge = config_flow.client.ManualChallenge(MagicMock(), b"synthetic", "image/png")
+    with (
+        patch.object(native_ocr, "ENGINE", native_ocr.LocalOCR(lambda: (_ for _ in ()).throw(OSError("synthetic")))),
+        patch.object(config_flow.client, "prepare_manual", return_value=challenge),
+        patch.object(config_flow, "register_manual_image", return_value="/captcha/synthetic"),
+    ):
+        result = await _start_user_flow(hass)
+        assert "ocr_url" not in {str(key) for key in result["data_schema"].schema}
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], _credentials())
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "manual"
+
+
+async def test_empty_url_prefers_builtin_even_on_haos(hass):
+    from custom_components.taiwater.ocr import async_resolve_ocr_url
+
+    hass.config.components.add("hassio")
+    assert await async_resolve_ocr_url(hass) == ""
+    assert await async_resolve_ocr_url(hass, "http://optional-ocr:8080/") == "http://optional-ocr:8080"
+
+
 async def test_options_ui_time_value_is_persisted_as_hh_mm(hass, config_entry):
     config_entry.add_to_hass(hass)
     result = await hass.config_entries.options.async_init(config_entry.entry_id)

@@ -33,7 +33,8 @@ async def test_slow_statistics_release_query_and_coalesce_latest_correction(
     snapshots = []
 
     async def slow_publish(_hass, _entry, _name, daily):
-        snapshots.append(sum(day["cost"] for day in daily.values()))
+        # Revision assertion, independent of Decimal division's sub-cent residue.
+        snapshots.append(sum(day["cost"] for day in daily.values()).quantize(Decimal("0.000000001")))
         started.set()
         await release.wait()
         return "published"

@@ -4,7 +4,7 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-在 Home Assistant 查詢台水帳單、用水量與費用。填入水號及戶名即可使用，OCR 在自己的 HA 主機執行，不必另外安裝附加元件或下載模型。
+在 Home Assistant 查詢台水帳單、用水量與費用。填入水號及戶名即可使用。
 
 非台水官方整合，適用台灣自來水公司，不適用臺北自來水事業處。
 

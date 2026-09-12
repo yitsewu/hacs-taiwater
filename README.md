@@ -1,5 +1,9 @@
 # Taiwan Water / 台灣自來水公司帳單匯入
 
+[![台水實際查詢](https://github.com/yitsewu/taiwan-water/actions/workflows/live-check.yaml/badge.svg?branch=main)](https://github.com/yitsewu/taiwan-water/actions/workflows/live-check.yaml)
+
+**定期相容性檢查：** 每 6 小時由 GitHub 雲端使用最新正式版與測試帳戶，實際驗證內建 OCR、台水驗證及最新一期帳單解析。`passing` 表示最近一次查詢成功；`failing` 表示檢查失敗，請點徽章查看該次執行的時間、版本與錯誤分類。超過 12 小時沒有新結果時應視為**狀態未知**，不可將舊綠燈視為仍可用。這是單一帳戶及 GitHub 網路的結果，不保證所有帳戶、家中連線或 HA 統計功能皆正常。[檢查範圍與維護](docs/live-check.md)
+
 [![Open your Home Assistant instance and open a repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=taiwan-water&category=integration)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

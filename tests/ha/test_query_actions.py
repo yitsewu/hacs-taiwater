@@ -87,12 +87,16 @@ async def test_targeted_month_updates_only_target_and_keeps_schedule(hass, confi
     result["available_months"] = ["2026-08", "2026-06"]
     with patch.object(client, "query", return_value=result) as query:
         response = await call(hass, config_entry, "query_month", month="2026-06")
+        await hass.async_block_till_done()
         query.assert_called_once()
         assert query.call_args.kwargs["requested_month"] == "2026-06"
         await call(hass, config_entry, "query_month", month="2026-06")
+        await hass.async_block_till_done()
         result["bills"][0]["fields"]["應繳總金額"] = "400元"
         await call(hass, config_entry, "query_month", month="2026-06")
+        await hass.async_block_till_done()
         await call(hass, config_entry, "query_month", month="2026-06")
+        await hass.async_block_till_done()
     assert response["bill"]["month"] == "2026-06"
     assert response["query"]["operation"] == "month"
     assert response["query"]["trigger"] == "action"

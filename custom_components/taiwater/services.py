@@ -37,7 +37,8 @@ def async_register_services(hass):
         try:
             record = await coordinator.async_query(requested_month=call.data["month"], trigger="action")
         except client.QueryError as error:
-            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="query_failed",
+            raise ServiceValidationError(translation_domain=DOMAIN,
+                                         translation_key="query_busy" if error.code == "busy" else "query_failed",
                                          translation_placeholders={"code": error.code}) from None
         return {"query": record, "bill": coordinator.bills[call.data["month"]]}
 

@@ -142,6 +142,8 @@
   },
   "entity": {
     "sensor": {
+      "statistics_duration": {"name": "Last statistics publication duration"},
+      "statistics_updated": {"name": "Last statistics publication"},
       "latest_bill": { "name": "Latest bill" },
       "usage_m3": { "name": "Latest bill water usage" },
       "total_twd": { "name": "Latest bill total" },
@@ -172,7 +174,7 @@
       "error_code": { "name": "Error code" },
       "available_count": { "name": "Available bill count" },
       "imported_count": { "name": "Imported bill count" },
-      "statistics_status": { "name": "Statistics status" },
+      "statistics_status": {"name": "Statistics status", "state": {"not_imported": "Not imported", "pending": "Pending", "running": "Publishing", "published": "Published", "partial": "Monthly data only", "failed": "Failed"}},
       "monthly_water": { "name": "Latest allocated month water usage" },
       "monthly_cost": { "name": "Latest allocated month cost" },
       "monthly_carbon": { "name": "Latest allocated month carbon emissions" },
@@ -217,6 +219,7 @@
       "history_complete": { "name": "History complete" }
     },
     "button": {
+      "rebuild_statistics": {"name": "Rebuild long-term statistics"},
       "query_latest": { "name": "Query latest bill" },
       "backfill_history": { "name": "Backfill bill history" }
     },
@@ -225,6 +228,7 @@
     }
   },
   "exceptions": {
+      "query_busy": {"message": "A Taiwan Water query is already running. Wait for it to finish before trying again."},
     "query_failed": { "message": "The Taiwan Water query failed ({code})." },
     "set_enabled_failed": { "message": "Could not change the query schedule ({code})." }
   },

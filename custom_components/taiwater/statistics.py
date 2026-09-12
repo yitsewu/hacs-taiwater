@@ -225,7 +225,7 @@ async def async_publish_statistics(
     idempotent.
     """
     statistic_ids = _entry_statistic_ids(entry_id)
-    series = _build_series(daily)
+    series = await hass.async_add_executor_job(_build_series, daily)
 
     async with _publish_lock(hass, entry_id.lower()):
         recorder = get_instance(hass)

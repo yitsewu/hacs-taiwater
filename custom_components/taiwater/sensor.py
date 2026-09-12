@@ -263,7 +263,17 @@ CORE_SENSORS: tuple[TaiWaterSensorDescription, ...] = (
         key="imported_count", translation_key="imported_count", value_fn=_number
     ),
     TaiWaterSensorDescription(
-        key="statistics_status", translation_key="statistics_status"
+        key="statistics_status", translation_key="statistics_status",
+        device_class=SensorDeviceClass.ENUM,
+        enum_options=("not_imported", "pending", "running", "published", "partial", "failed"),
+    ),
+    TaiWaterSensorDescription(
+        key="statistics_updated", translation_key="statistics_updated",
+        device_class=SensorDeviceClass.TIMESTAMP, value_fn=_timestamp,
+    ),
+    TaiWaterSensorDescription(
+        key="statistics_duration", translation_key="statistics_duration",
+        device_class=SensorDeviceClass.DURATION, native_unit_of_measurement="s", value_fn=_number,
     ),
     # 以下為 coordinator 已配置好的目前月／年摘要；長期統計由 statistics.py
     # 另行發布，這些會切換月份／年度的顯示值不宣告 state class。

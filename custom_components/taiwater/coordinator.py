@@ -47,10 +47,14 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.query_history = []
         self.store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}", private=True)
         self._query_lock = asyncio.Lock()
+        self._store_lock = asyncio.Lock()
         self._cancel_timer = None
         self._closing = False
         self._initial_task = None
         self._statistics_fingerprint = None
+        self._statistics_task = None
+        self._statistics_pending = False
+        self._statistics_force = False
         self.data = {
             "query_status": "never", "query_success": None, "ocr_status": "not_run",
             "ocr_success": None, "verification_status": "not_run", "verification_success": None,
@@ -83,13 +87,13 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             record = self._begin_record("setup", "initial", None, self.data["last_attempt"])
             await self._accept_result(seed)
             self._finish_record(record, seed["finished_at"], None, len(seed["bills"]))
-        elif self.bills:
-            await self._publish_statistics()
         self._schedule()
         self.async_set_updated_data(dict(self.data))
         await self._save()
 
     def async_start(self):
+        if self.bills:
+            self.async_rebuild_statistics()
         # 首次回填優先；沒有新需求時重啟只恢復排程，不立即重抓所有帳單。
         if not self.data["history_complete"]:
             self._initial_task = self.entry.async_create_background_task(
@@ -152,20 +156,51 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             # 缺項不冒充完整合計；已取得月份以 coverage metadata 呈現。
             self.data[f"year_{metric}"] = sum(values) if values and len(values) == len(months) else None
 
-    async def _publish_statistics(self):
+    def async_rebuild_statistics(self, *, force=False):
+        """Coalesce saved bill revisions into one worker, without querying the portal."""
+        if self._closing:
+            return
+        self._statistics_pending = True
+        self._statistics_force |= force
+        self.data["statistics_status"] = "pending"
+        self.async_set_updated_data(dict(self.data))
+        if self._statistics_task is None or self._statistics_task.done():
+            self._statistics_task = self.hass.async_create_task(
+                self._statistics_worker(), "taiwater_statistics"
+            )
+
+    async def _statistics_worker(self):
+        while self._statistics_pending:
+            self._statistics_pending = False
+            force, self._statistics_force = self._statistics_force, False
+            await self._publish_statistics(force=force)
+            self.async_set_updated_data(dict(self.data))
+            await self._save()
+
+    async def _publish_statistics(self, *, force=False):
         try:
+            # Snapshot immutable Bill values before yielding; newer queries queue another pass.
             bills = [Bill.from_dict(raw) for raw in self.bills.values()]
-            daily = allocate_days(bills, self.options.get("carbon_factor"), self.options.get("carbon_factor_source", ""), mode=self.options["allocation"])
+            daily = await self.hass.async_add_executor_job(partial(
+                allocate_days, bills, self.options.get("carbon_factor"),
+                self.options.get("carbon_factor_source", ""), mode=self.options["allocation"]
+            ))
             fingerprint = hashlib.sha256(json.dumps(serializable(daily), sort_keys=True).encode()).hexdigest()
-            if fingerprint == self._statistics_fingerprint and self.data.get("statistics_status") == "published":
+            if not force and fingerprint == self._statistics_fingerprint:
+                self.data["statistics_status"] = "published" if daily else "partial"
                 return
+            self.data["statistics_status"] = "running"
+            self.async_set_updated_data(dict(self.data))
+            started = time.monotonic()
             result = await async_publish_statistics(self.hass, self.entry.entry_id, self.entry.title, daily)
             self.data["statistics_status"] = result
-            if result == "published":
-                self._statistics_fingerprint = fingerprint
+            self.data["statistics_duration"] = round(time.monotonic() - started, 3)
+            self.data["statistics_updated"] = dt_util.utcnow().isoformat()
+            self._statistics_fingerprint = fingerprint
         except Exception:
             # 查詢成功與統計寫入失敗分開顯示，下次更新／重新載入可從保存帳單重建。
             self.data["statistics_status"] = "failed"
+            self._statistics_fingerprint = None
             _LOGGER.warning("台水歷史統計未完成；已保留帳單，可重新載入重建")
 
     async def _accept_result(self, result):
@@ -189,7 +224,6 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self._diagnostic_flags()
         self._rebuild()
         await self._save()
-        await self._publish_statistics()
 
     def _diagnostic_flags(self):
         ocr = self.data["ocr_status"]
@@ -265,18 +299,21 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
             if failure:
                 self.data.update(query_status="failed", query_success=False, error_code=failure, last_failure=client.now())
                 self._diagnostic_flags()
-            finished = self.data["last_failure"] if failure else result["finished_at"]
+            finished = self.data["last_failure"] if failure else dt_util.utcnow().isoformat()
             self._finish_record(record, finished, round(time.monotonic() - started, 3),
                                 fetched_count)
             self.async_set_updated_data(dict(self.data))
             await self._save()
+            if not failure:
+                self.async_rebuild_statistics()
             if failure and raise_errors:
                 raise client.QueryError(failure, ocr_status=self.data["ocr_status"], verification_status=self.data["verification_status"])
             return dict(record)
 
     async def _save(self):
-        await self.store.async_save({"bills": self.bills, "available_months": self.available_months,
-                                     "status": serializable(self.data), "query_history": self.query_history})
+        async with self._store_lock:
+            await self.store.async_save({"bills": self.bills, "available_months": self.available_months,
+                                         "status": serializable(self.data), "query_history": self.query_history})
 
     def _schedule(self):
         if self._cancel_timer:
@@ -309,4 +346,6 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         # 等待已開始的查詢保存結果，避免 reload 與舊 executor 同時查同一水號。
         async with self._query_lock:
             pass
+        if self._statistics_task is not None:
+            await self._statistics_task
         # 不會在 unload 刪帳單或外部統計；重裝之前可從 HA 備份復原。

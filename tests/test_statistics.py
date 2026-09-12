@@ -94,6 +94,9 @@ class _FakeRecorder:
 class _FakeHass:
     """Weak-referenceable stand-in for HomeAssistant."""
 
+    async def async_add_executor_job(self, job, *args):
+        return job(*args)
+
 
 class StatisticsTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:

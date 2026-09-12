@@ -110,6 +110,8 @@
   },
   "entity": {
     "sensor": {
+      "statistics_duration": {"name": "上次統計寫入耗時"},
+      "statistics_updated": {"name": "上次統計寫入完成"},
       "latest_bill": { "name": "最新帳單月份" },
       "usage_m3": { "name": "最新帳單用水量" },
       "total_twd": { "name": "最新帳單應繳總額" },
@@ -131,7 +133,7 @@
       "error_code": { "name": "錯誤代碼" },
       "available_count": { "name": "可查帳單期數" },
       "imported_count": { "name": "已匯入帳單期數" },
-      "statistics_status": { "name": "長期統計狀態" },
+      "statistics_status": {"name": "長期統計狀態", "state": {"not_imported": "尚未匯入", "pending": "等待背景寫入", "running": "背景寫入中", "published": "已完成", "partial": "僅有月份資料", "failed": "寫入失敗"}},
       "monthly_water": { "name": "最新配置月份用水量" },
       "monthly_cost": { "name": "最新配置月份水費" },
       "monthly_carbon": { "name": "最新配置月份碳排放量" },
@@ -176,12 +178,14 @@
       "history_complete": { "name": "歷史資料完整" }
     },
     "button": {
+      "rebuild_statistics": {"name": "重建長期統計"},
       "query_latest": { "name": "立即查詢最新帳單" },
       "backfill_history": { "name": "回填歷史帳單" }
     },
     "switch": { "enabled": { "name": "排程查詢" } }
   },
   "exceptions": {
+      "query_busy": {"message": "已有台水查詢正在進行，請等待查詢狀態完成後再試。"},
     "query_failed": { "message": "台水查詢失敗（{code}）。" },
     "set_enabled_failed": { "message": "無法變更查詢排程（{code}）。" }
   },

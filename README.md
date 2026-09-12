@@ -1,4 +1,4 @@
-# Taiwan Water HACS
+# HACS - Taiwan Water 
 
 [![Open your Home Assistant instance and open a repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=taiwater-hacs&category=integration)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)

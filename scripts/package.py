@@ -22,7 +22,7 @@ component = root / "custom_components" / "taiwater"
 version = json.loads((component / "manifest.json").read_text(encoding="utf-8"))["version"]
 output = root / "dist"
 output.mkdir(exist_ok=True)
-files = sorted(p for p in component.rglob("*") if p.is_file() and p.suffix in {".py", ".json", ".yaml", ".svg", ".png"} and "__pycache__" not in p.parts)
+files = sorted((p for p in component.rglob("*") if p.is_file() and p.suffix in {".py", ".json", ".yaml", ".svg", ".png"} and "__pycache__" not in p.parts), key=lambda p: p.as_posix())
 with ZipFile(output / f"taiwater-{version}.zip", "w", ZIP_DEFLATED) as archive:
     for path in files:
         add_source(archive, path, root)
@@ -30,7 +30,7 @@ print(json.dumps({"version": version, "files": len(files), "archive": str(output
 addon = root / "taiwater_ocr"
 addon_output = output / f"taiwater-ocr-{version}.zip"
 with ZipFile(addon_output, "w", ZIP_DEFLATED) as archive:
-    for path in sorted(addon.rglob("*")):
+    for path in sorted(addon.rglob("*"), key=lambda p: p.as_posix()):
         if path.is_file() and "__pycache__" not in path.parts and (path.suffix in {".py", ".yaml", ".md", ".txt"} or path.name == "Dockerfile"):
             add_source(archive, path, root)
 archives = [output / f"taiwater-{version}.zip", addon_output]

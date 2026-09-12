@@ -22,9 +22,7 @@
 
 需要 **Home Assistant 2026.9.1 以上**。已驗證 Core 2026.9.1 的 amd64／aarch64；其他版本及 32 位元平台尚未驗證。
 
-> 儲存庫目前為私人開發版，HACS 無法直接下載，請使用下方 ZIP 安裝。公開後即可使用頁首 HACS 按鈕；「HACS Custom」表示自訂儲存庫。
-
-**HACS（儲存庫公開後）**
+**HACS**
 
 1. 先安裝 HACS，點頁首按鈕開啟儲存庫；也可在 HACS「自訂儲存庫」加入 `https://github.com/yitsewu/taiwater-hacs`，類型選「整合」。
 2. 下載整合，重新啟動 Home Assistant。

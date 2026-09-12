@@ -6,7 +6,7 @@ Version 0.4.0, tested with Home Assistant Core 2026.9.1. This is an unofficial i
 
 ## Install
 
-With a public repository, add `https://github.com/yitsewu/taiwater-hacs` as a HACS custom Integration repository, download and restart HA normally. This development repository is currently private: use the release ZIP and copy the entire `custom_components/taiwater` directory, including `models`, into `/config/custom_components`.
+Add `https://github.com/yitsewu/taiwater-hacs` as a HACS custom Integration repository, download and restart HA normally. Alternatively, use the release ZIP and copy the entire `custom_components/taiwater` directory, including `models`, into `/config/custom_components`.
 
 Add Taiwan Water Corporation under Settings → Devices & services. Enter the water ID and customer name. OCR runs inside HA Core on your own host. No app/add-on, container, shell command, OCR URL or manual model download is required. Schedule and history options remain configurable. Existing accounts and saved bills survive upgrades.
 

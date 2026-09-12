@@ -5,7 +5,7 @@
     "step": {
       "user": {
         "title": "Connect Taiwan Water",
-        "description": "OCR and its model are bundled and run entirely on this HA host. Enter your water ID and customer name to check the latest bill, then backfill history in the background. Manual verification is available if recognition fails.",
+        "description": "Enter your water ID and customer name to retrieve water bills.",
         "data": {
           "water_id": "Water account number",
           "customer_name": "Customer name",
@@ -15,10 +15,10 @@
         },
         "data_description": {
           "water_id": "11 letters or digits; spaces and hyphens are removed.",
-          "customer_name": "Name used by the official bill detail form.",
-          "name": "Name shown for this integration device.",
+          "customer_name": "Check your bill and enter the customer name shown on it.",
+          "name": "Device name displayed in Home Assistant.",
           "ocr_url": "Leave empty for built-in OCR. Set an external endpoint only as an advanced override; normal installation does not need one.",
-          "history_limit": "Choose the maximum history to backfill after the latest bill is verified."
+          "history_limit": "How much history to backfill on the first import after setup. The default, 0, imports all available bills."
         }
       },
       "reconfigure": {
@@ -33,8 +33,8 @@
         },
         "data_description": {
           "water_id": "11 letters or digits; spaces and hyphens are removed.",
-          "customer_name": "Name used by the official bill detail form.",
-          "name": "Name shown for this integration device.",
+          "customer_name": "Check your bill and enter the customer name shown on it.",
+          "name": "Device name displayed in Home Assistant.",
           "ocr_url": "Leave empty for built-in OCR. Set an external endpoint only as an advanced override; normal installation does not need one.",
           "history_limit": "Choose the maximum history to keep importing after verification."
         }

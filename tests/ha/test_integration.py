@@ -34,7 +34,7 @@ async def _setup_seeded(hass, config_entry, result):
     ] = deepcopy(result)
     config_entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(config_entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
     return config_entry.runtime_data
 
 
@@ -130,7 +130,7 @@ async def test_seeded_storage_restart_does_not_duplicate_bill(
 
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     assert await hass.config_entries.async_setup(config_entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     restarted = config_entry.runtime_data
     assert list(restarted.bills) == ["2026-08"]
@@ -167,7 +167,7 @@ async def test_disabled_switch_persists_entry_option(
     await hass.services.async_call(
         "switch", "turn_off", {"entity_id": switch_id}, blocking=True
     )
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     assert config_entry.options["enabled"] is False
     assert config_entry.runtime_data.data["enabled"] is False

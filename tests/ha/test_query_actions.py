@@ -16,7 +16,7 @@ async def _setup_seeded(hass, entry, result):
     hass.data.setdefault(DOMAIN, {}).setdefault("seeds", {})[entry.unique_id] = deepcopy(result)
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
     return entry.runtime_data
 
 
@@ -46,7 +46,7 @@ async def test_query_history_failure_partial_and_restart(hass, config_entry, bil
         assert value not in encoded
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     assert await hass.config_entries.async_setup(config_entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
     assert (await call(hass, config_entry, "get_query_history")) == response
 
 
@@ -57,7 +57,7 @@ async def test_running_record_becomes_interrupted_on_restart(hass, config_entry,
     await coordinator._save()
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     assert await hass.config_entries.async_setup(config_entry.entry_id)
-    await hass.async_block_till_done()
+    await hass.async_block_till_done(wait_background_tasks=True)
     record = (await call(hass, config_entry, "get_query_history"))["records"][0]
     assert record["status"] == "interrupted"
     assert record["error_code"] == "interrupted"
@@ -87,16 +87,16 @@ async def test_targeted_month_updates_only_target_and_keeps_schedule(hass, confi
     result["available_months"] = ["2026-08", "2026-06"]
     with patch.object(client, "query", return_value=result) as query:
         response = await call(hass, config_entry, "query_month", month="2026-06")
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
         query.assert_called_once()
         assert query.call_args.kwargs["requested_month"] == "2026-06"
         await call(hass, config_entry, "query_month", month="2026-06")
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
         result["bills"][0]["fields"]["應繳總金額"] = "400元"
         await call(hass, config_entry, "query_month", month="2026-06")
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
         await call(hass, config_entry, "query_month", month="2026-06")
-        await hass.async_block_till_done()
+        await hass.async_block_till_done(wait_background_tasks=True)
     assert response["bill"]["month"] == "2026-06"
     assert response["query"]["operation"] == "month"
     assert response["query"]["trigger"] == "action"

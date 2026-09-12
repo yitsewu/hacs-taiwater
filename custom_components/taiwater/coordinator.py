@@ -165,8 +165,8 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.data["statistics_status"] = "pending"
         self.async_set_updated_data(dict(self.data))
         if self._statistics_task is None or self._statistics_task.done():
-            self._statistics_task = self.hass.async_create_task(
-                self._statistics_worker(), "taiwater_statistics"
+            self._statistics_task = self.entry.async_create_background_task(
+                self.hass, self._statistics_worker(), "taiwater_statistics"
             )
 
     async def _statistics_worker(self):

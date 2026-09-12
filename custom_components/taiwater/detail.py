@@ -21,7 +21,7 @@ class DetailParser(HTMLParser):
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         if tag == 'button':
-            match = re.fullmatch(r"ShowInputName\('([0-9]{11})','(T[0-9]{5})'\);?", attrs.get('onclick', '').strip())
+            match = re.fullmatch(r"ShowInputName\('([A-Z0-9]{11})','(T[0-9]{5})'\);?", attrs.get('onclick', '').strip())
             if match:
                 self.buttons.append(match.groups())
         if tag == 'select' and attrs.get('name') == 'TBName':

@@ -27,7 +27,6 @@ def _credentials(water_id=WATER_ID):
         "water_id": water_id,
         "customer_name": CUSTOMER_NAME,
         "name": ENTRY_NAME,
-        "ocr_url": "",
     }
 
 

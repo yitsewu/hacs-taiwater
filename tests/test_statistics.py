@@ -178,7 +178,7 @@ class StatisticsTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(water_meta["has_sum"])
         self.assertEqual(water_meta["unit_class"], "volume")
         self.assertEqual(water_meta["unit_of_measurement"], "m³")
-        self.assertEqual(water_meta["name"], "住家 台水水量（分攤估算）")
+        self.assertEqual(water_meta["name"], "住家 總用水量")
         self.assertEqual(len(water_rows), 49)
         self.assertEqual(water_rows[0]["sum"], 0.0)
         self.assertEqual(water_rows[1]["sum"], 0.5)

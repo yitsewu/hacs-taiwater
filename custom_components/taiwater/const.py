@@ -11,7 +11,7 @@ DEFAULT_OPTIONS = {
     "weekday": 0,
     "monthday": 1,
     "history_limit": 0,
-    "allocation": "days",
+    "allocation": "equal",
     "carbon_factor": None,
     "carbon_factor_source": "",
     "ocr_url": "",

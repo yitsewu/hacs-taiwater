@@ -5,7 +5,7 @@
     "step": {
       "user": {
         "title": "Connect Taiwan Water",
-        "description": "The integration first checks the latest bill. It uses the local OCR add-on when available; otherwise it opens a manual CAPTCHA step. Account details and raw responses are never placed in entity IDs or diagnostics.",
+        "description": "OCR and its model are bundled and run entirely on this HA host. Enter your water ID and customer name to check the latest bill, then backfill history in the background. Manual verification is available if recognition fails.",
         "data": {
           "water_id": "Water account number",
           "customer_name": "Customer name",
@@ -17,7 +17,7 @@
           "water_id": "11 letters or digits; spaces and hyphens are removed.",
           "customer_name": "Name used by the official bill detail form.",
           "name": "Name shown for this integration device.",
-          "ocr_url": "Leave blank to discover the local HAOS add-on or use native OCR when available.",
+          "ocr_url": "Leave empty for built-in OCR. Set an external endpoint only as an advanced override; normal installation does not need one.",
           "history_limit": "Choose the maximum history to backfill after the latest bill is verified."
         }
       },
@@ -35,7 +35,7 @@
           "water_id": "11 letters or digits; spaces and hyphens are removed.",
           "customer_name": "Name used by the official bill detail form.",
           "name": "Name shown for this integration device.",
-          "ocr_url": "Leave blank to discover the local HAOS add-on or use native OCR when available.",
+          "ocr_url": "Leave empty for built-in OCR. Set an external endpoint only as an advanced override; normal installation does not need one.",
           "history_limit": "Choose the maximum history to keep importing after verification."
         }
       },
@@ -91,7 +91,8 @@
           "ocr_url": "Advanced: OCR service URL"
         },
         "data_description": {
-          "ocr_url": "Leave blank to discover the local HAOS OCR add-on or use native OCR when available.",
+          "ocr_url": "Leave empty for built-in OCR. Set an external endpoint only as an advanced override; normal installation does not need one.",
+          "allocation": "Taiwan Water bills usually cover two months. By default, usage and cost are split equally between the two covered months; for example, 60 m³ becomes 30 m³ per month. These are bill-based estimates, not monthly meter readings. Other billing periods are divided equally among their covered months.",
           "carbon_factor_source": "Required when a carbon factor is configured."
         }
       },
@@ -142,6 +143,7 @@
   },
   "entity": {
     "sensor": {
+      "ocr_backend": {"name": "OCR backend", "state": {"not_run": "Not run", "builtin": "Built-in local OCR", "external": "External OCR", "manual": "Manual verification"}},
       "statistics_duration": {"name": "Last statistics publication duration"},
       "statistics_updated": {"name": "Last statistics publication"},
       "latest_bill": { "name": "Latest bill" },

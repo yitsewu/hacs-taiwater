@@ -14,6 +14,7 @@ _SAFE_CODE = re.compile(r"^[a-z0-9_]{1,64}$")
 _STATUS_KEYS = (
     "query_status",
     "ocr_status",
+    "ocr_backend",
     "verification_status",
     "statistics_status",
     "error_code",

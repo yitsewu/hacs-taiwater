@@ -42,7 +42,7 @@ _UNKNOWN_VALUES: Final = frozenset({"", "none", "null", "unknown", "unavailable"
 _METRICS: Final = {
     "water": (
         "water",
-        "台水水量（分攤估算）",
+        "總用水量",
         VolumeConverter.UNIT_CLASS,
         UnitOfVolume.CUBIC_METERS,
     ),

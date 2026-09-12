@@ -4,12 +4,10 @@ from __future__ import annotations
 import base64
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-import io
 import json
 import re
 import secrets
 import ssl
-import threading
 import time
 import urllib.error
 import urllib.parse
@@ -18,8 +16,6 @@ import urllib.request
 from .detail import DetailClient
 from .portal import QueryRejected, SiteSchemaChanged, TaiWaterError, normalize_water_id
 
-_OCR_LOCK = threading.Lock()
-_OCR_ENGINE = None
 
 
 def now() -> str:
@@ -156,23 +152,13 @@ def recognize(image: bytes, ocr_url: str = "") -> str:
         except Exception:
             raise QueryError("ocr_unavailable", ocr_status="unavailable") from None
     else:
+        from .native_ocr import ENGINE, OCRFailed, OCRUnavailable
+
         try:
-            from PIL import Image
-            import ddddocr
-            global _OCR_ENGINE
-            with _OCR_LOCK:
-                if _OCR_ENGINE is None:
-                    _OCR_ENGINE = ddddocr.DdddOcr(show_ad=False)
-                with Image.open(io.BytesIO(image)) as source:
-                    if source.width * source.height > 4_000_000:
-                        raise ValueError("image_size")
-                    source.seek(0)
-                    output = io.BytesIO()
-                    source.convert("RGB").save(output, format="PNG")
-                code = _OCR_ENGINE.classification(output.getvalue())
-        except ImportError:
+            code = ENGINE.recognize(image)
+        except OCRUnavailable:
             raise QueryError("ocr_unavailable", ocr_status="unavailable") from None
-        except Exception:
+        except OCRFailed:
             raise QueryError("ocr_failed", ocr_status="failed") from None
     if not isinstance(code, str) or not re.fullmatch(r"[A-Za-z0-9]{4,8}", code):
         raise QueryError("ocr_failed", ocr_status="failed")
@@ -252,8 +238,10 @@ def query(water_id, customer_name, *, ocr_url="", history_limit=None, known_mont
         validate_month(requested_month)
     challenge = prepare_manual()
     code = recognize(challenge.image, ocr_url)
-    return submit_manual(challenge, water_id, customer_name, code, history_limit=history_limit,
+    result = submit_manual(challenge, water_id, customer_name, code, history_limit=history_limit,
                          known_months=known_months, refresh_history=refresh_history, ocr_status="success", requested_month=requested_month)
+    result["ocr_backend"] = "external" if ocr_url else "builtin"
+    return result
 
 
 def validate_credentials(water_id, customer_name, ocr_url=""):

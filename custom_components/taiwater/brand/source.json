@@ -1,0 +1,9 @@
+{
+  "source_url": "https://www.water.gov.tw/Img/logo_2.png",
+  "source_page": "https://www.water.gov.tw/",
+  "retrieved_on": "2026-09-12",
+  "description": "台灣自來水公司官網使用的圓形識別標誌，原始 PNG，49×49，未修改。",
+  "purpose": "在 Home Assistant 顯示所連接的台水服務，非官方整合或背書。",
+  "rights": "標誌權利歸台灣自來水公司所有；不包含在本專案程式碼授權中。",
+  "sha256": "87d04652071d8d735b1cbda983dee11e1f846b89f6fd977e20b6edf1d8fa89f8"
+}

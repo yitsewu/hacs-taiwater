@@ -119,8 +119,6 @@ def _credential_schema(values: dict[str, Any]) -> vol.Schema:
             ): selector.TextSelector(),
             vol.Required(CONF_NAME, default=values.get(CONF_NAME, NAME)):
                 selector.TextSelector(),
-            vol.Optional(CONF_OCR_URL, default=values.get(CONF_OCR_URL, "")):
-                selector.TextSelector(),
             vol.Required(
                 "history_limit", default=values.get("history_limit", 0)
             ): selector.NumberSelector(

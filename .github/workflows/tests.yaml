@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install pytest pytest-asyncio tzdata Pillow==12.1.0 ruff
+      - run: pip install pytest pytest-asyncio tzdata Pillow==12.3.0 numpy==2.3.2 ruff
       - run: ruff check custom_components tests scripts taiwater_ocr
       - run: pytest tests --ignore=tests/ha -q
       - run: python scripts/package.py
@@ -40,6 +40,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: home-assistant/actions/hassfest@master
+  core-ocr:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Built-in OCR in clean official Core (no add-on)
+        run: >-
+          docker run --rm -v "$PWD:/work:ro" --entrypoint python
+          ghcr.io/home-assistant/home-assistant:2026.9.1 /work/scripts/core_ocr_smoke.py
+      - name: Install test-only legacy CPU emulator
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y qemu-user-static
+      - name: Core Python with SSE2/SSE3 legacy CPU baseline
+        if: matrix.os == 'ubuntu-latest'
+        run: >-
+          docker run --rm -v "$PWD:/work:ro"
+          -v /usr/bin/qemu-x86_64-static:/usr/local/bin/qemu-x86_64-static:ro
+          --entrypoint /usr/local/bin/qemu-x86_64-static
+          ghcr.io/home-assistant/home-assistant:2026.9.1
+          -cpu qemu64 /usr/local/bin/python /work/scripts/core_ocr_smoke.py
   ocr:
     strategy:
       matrix:

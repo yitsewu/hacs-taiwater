@@ -136,7 +136,8 @@ class ClientTests(unittest.TestCase):
         open_https.assert_not_called()
 
     def test_native_ocr_unavailable_is_explicit(self):
-        with patch.dict(sys.modules, {"ddddocr": None}):
+        native = importlib.import_module(f"{PACKAGE}.native_ocr")
+        with patch.object(native.ENGINE, "recognize", side_effect=native.OCRUnavailable):
             with self.assertRaises(client.QueryError) as error:
                 client.recognize(b"fixture")
         self.assertEqual(error.exception.code, "ocr_unavailable")

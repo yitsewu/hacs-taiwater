@@ -57,7 +57,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self._statistics_force = False
         self.data = {
             "query_status": "never", "query_success": None, "ocr_status": "not_run",
-            "ocr_success": None, "verification_status": "not_run", "verification_success": None,
+            "ocr_success": None, "ocr_backend": "not_run", "verification_status": "not_run", "verification_success": None,
             "error_code": None, "statistics_status": "not_imported", "history_complete": False,
             "available_count": 0, "imported_count": 0, "enabled": self.options["enabled"],
         }
@@ -217,6 +217,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
         self.data.update(query_status=result["status"], query_success=successful,
                          ocr_status=result["ocr_status"], verification_status=result["verification_status"],
                          error_code=result.get("error_code"))
+        self.data["ocr_backend"] = result.get("ocr_backend", self.data.get("ocr_backend", "not_run"))
         if successful:
             self.data["last_success"] = finished
         else:
@@ -263,6 +264,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
     def _finish_record(self, record, finished_at, duration, fetched_count):
         record.update(finished_at=finished_at, duration_seconds=duration,
                       status=self.data["query_status"], ocr_status=self.data["ocr_status"],
+                      ocr_backend=self.data.get("ocr_backend", "not_run"),
                       verification_status=self.data["verification_status"],
                       error_code=self.data["error_code"], fetched_count=fetched_count)
 
@@ -272,6 +274,7 @@ class TaiWaterCoordinator(DataUpdateCoordinator):
                 raise client.QueryError("busy")
             return
         async with self._query_lock:
+            self.data["ocr_backend"] = "manual" if trigger == "manual" else "external" if job.keywords.get("ocr_url") else "builtin"
             self.data.update(last_attempt=client.now(), query_status="running", query_success=None,
                              ocr_status="not_run", verification_status="not_run", ocr_success=None,
                              verification_success=None, error_code=None)

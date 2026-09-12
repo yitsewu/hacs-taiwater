@@ -1,0 +1,14 @@
+{
+  "source": "https://pypi.org/project/ddddocr/1.5.6/",
+  "license": "MIT",
+  "repository": "https://github.com/sml2h3/ddddocr",
+  "wheel": "ddddocr-1.5.6-py3-none-any.whl",
+  "wheel_sha256": "f13865b00e42de5c2507c1889ba73c2bacd218a49d15b928c2a5c82667062ac5",
+  "source_model": "ddddocr/common_old.onnx",
+  "source_model_sha256": "b8f2ad9cbc1f2e3922a6cb9459e30824e7e2467f3fb4fd61420640e34ea0bf68",
+  "conversion": "Lossless initializer export; NumPy evaluator uses float32 LSTM activations instead of dynamic quantization.",
+  "assets": {
+    "ocr_weights.npz": "7534858b7f50ed0b137814ba1875dfb858bc34812ac149445e5d76c5eb067f6d",
+    "ocr_graph.json": "af7c68d7c63c8eece8c3705db8b63c46d12c36fac07c731b4d2d7e5f4a85de2e"
+  }
+}

@@ -22,7 +22,7 @@ component = root / "custom_components" / "taiwater"
 version = json.loads((component / "manifest.json").read_text(encoding="utf-8"))["version"]
 output = root / "dist"
 output.mkdir(exist_ok=True)
-files = sorted((p for p in component.rglob("*") if p.is_file() and p.suffix in {".py", ".json", ".yaml", ".svg", ".png"} and "__pycache__" not in p.parts), key=lambda p: p.as_posix())
+files = sorted((p for p in component.rglob("*") if p.is_file() and p.suffix in {".py", ".json", ".yaml", ".svg", ".png", ".npz", ".txt", ".md"} and "__pycache__" not in p.parts), key=lambda p: p.as_posix())
 with ZipFile(output / f"taiwater-{version}.zip", "w", ZIP_DEFLATED) as archive:
     for path in files:
         add_source(archive, path, root)

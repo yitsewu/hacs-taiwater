@@ -250,6 +250,10 @@ CORE_SENSORS: tuple[TaiWaterSensorDescription, ...] = (
         enum_options=("not_run", "success", "failed", "unavailable", "not_needed"),
     ),
     TaiWaterSensorDescription(
+        key="ocr_backend", translation_key="ocr_backend", device_class=SensorDeviceClass.ENUM,
+        enum_options=("not_run", "builtin", "external", "manual"),
+    ),
+    TaiWaterSensorDescription(
         key="verification_status",
         translation_key="verification_status",
         device_class=SensorDeviceClass.ENUM,

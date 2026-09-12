@@ -5,13 +5,13 @@
     "step": {
       "user": {
         "title": "連接台灣自來水公司",
-        "description": "整合會先即時查核最新一期帳單。有本機 OCR 附加元件時會優先使用；沒有可用 OCR 時會自動進入人工驗證碼步驟。帳戶資料與原始回應不會放入 entity ID 或診斷資料。",
+        "description": "OCR 與模型已內建，全部在此 HA 主機執行。填入水號及戶名後先查最新帳單，再於背景回填歷史。辨識無法完成時可人工輸入驗證碼。",
         "data": { "water_id": "水號", "customer_name": "用水戶名", "name": "顯示名稱", "ocr_url": "進階：OCR 服務 URL", "history_limit": "初次歷史期數上限（0 為全部）" },
         "data_description": {
           "water_id": "11 位英數字；空白與連字號會自動移除。",
           "customer_name": "台水帳單明細頁驗證使用的姓名。",
           "name": "這組台水 entities 在 Home Assistant 顯示的裝置名稱。",
-          "ocr_url": "留空會自動尋找本機 HAOS OCR 附加元件，或在可用時使用 native OCR。",
+          "ocr_url": "留空使用內建 OCR。僅進階備援才填既有外部 OCR 網址；正常安裝不需要。",
           "history_limit": "驗證最新帳單後，最多回填多少期歷史帳單。"
         }
       },
@@ -23,7 +23,7 @@
           "water_id": "11 位英數字；空白與連字號會自動移除。",
           "customer_name": "台水帳單明細頁驗證使用的姓名。",
           "name": "這組台水 entities 在 Home Assistant 顯示的裝置名稱。",
-          "ocr_url": "留空會自動尋找本機 HAOS OCR 附加元件，或在可用時使用 native OCR。",
+          "ocr_url": "留空使用內建 OCR。僅進階備援才填既有外部 OCR 網址；正常安裝不需要。",
           "history_limit": "重新驗證後最多匯入多少期歷史帳單。"
         }
       },
@@ -74,7 +74,8 @@
           "ocr_url": "進階：OCR 服務 URL"
         },
         "data_description": {
-          "ocr_url": "留空會自動尋找本機 HAOS OCR 附加元件，或在可用時使用 native OCR。",
+          "ocr_url": "留空使用內建 OCR。僅進階備援才填既有外部 OCR 網址；正常安裝不需要。",
+          "allocation": "台水帳單通常兩個月一期。預設將整期用水量與費用平均分配到帳單涵蓋的兩個月，例如 60 度分為每月 30 度。這是帳單分攤估算，並非每月實際抄表量；非兩個月的帳期依實際涵蓋月份平均分配。",
           "carbon_factor_source": "設定碳排係數時必填。"
         }
       },
@@ -110,6 +111,7 @@
   },
   "entity": {
     "sensor": {
+      "ocr_backend": {"name": "OCR 執行方式", "state": {"not_run": "尚未執行", "builtin": "內建本機 OCR", "external": "外部 OCR", "manual": "人工驗證"}},
       "statistics_duration": {"name": "上次統計寫入耗時"},
       "statistics_updated": {"name": "上次統計寫入完成"},
       "latest_bill": { "name": "最新帳單月份" },

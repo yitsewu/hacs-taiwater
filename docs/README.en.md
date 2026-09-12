@@ -1,5 +1,7 @@
 # Taiwan Water: built-in local OCR
 
+[繁體中文](../README.md) · [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=taiwater-hacs&category=integration) · [MIT License](../LICENSE)
+
 Version 0.4.0, tested with Home Assistant Core 2026.9.1. This is an unofficial integration for Taiwan Water Corporation.
 
 ## Install
@@ -25,3 +27,7 @@ Official unmodified Core 2026.9.1 containers: Python 3.14.6, musl, amd64 and aar
 Back up HA before upgrading. Replace the complete integration and restart; account entry, history, scheduling, allocation preferences and background statistics are retained. Monthly amounts are bill allocations, not actual monthly meter readings. Carbon requires upstream values or a configured factor with source/year. External long-term statistics are rebuilt in the background.
 
 New accounts default to equal allocation across covered months (60 m³ / TWD 600 over two months becomes 30 m³ / TWD 300 each). Existing choices remain unchanged; legacy accounts without an explicit option retain the old day-based default. Change allocation in integration options; reload rebuilds owned statistics. The Rebuild statistics button retries from saved bills without contacting Taiwan Water. Display name changes retain all entity/statistic IDs.
+
+## License
+
+Code is licensed under [MIT](../LICENSE). The bundled OCR model retains its [upstream MIT notice](../custom_components/taiwater/models/LICENSE.ddddocr.txt). Taiwan Water Corporation owns its logo; the logo is excluded from the code license.

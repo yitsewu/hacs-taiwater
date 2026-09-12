@@ -1,4 +1,4 @@
-# 台灣自來水公司
+# Taiwan Water HACS
 
 [![Open your Home Assistant instance and open a repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yitsewu&repository=taiwater-hacs&category=integration)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
@@ -51,11 +51,13 @@
 
 碳排使用原站數值，或自行設定含來源與年份的碳排係數；缺少資料時顯示未知。
 
-## 遇到問題
-
-OCR 無法完成時，可使用整合選項中的「人工查詢」。統計寫入失敗可按「重建長期統計」，不必重新查帳單。更多設定、驗證平台及疑難排解見 [使用指南](docs/usage.md)。
+### 問題回報
 
 回報問題請到 [Issues](https://github.com/yitsewu/taiwater-hacs/issues)，勿附上水號、戶名、Cookie、驗證碼或原始帳單。
+
+### 資料來源
+
+資料來自台灣自來水公司的[水費查詢網站](https://www.water.gov.tw/ch/EQuery/WaterFeeQuery?nodeId=753)。本整合使用填入的水號與戶名，依網站驗證流程取得帳單明細，再整理為 Home Assistant 的用水量、費用與歷史統計。
 
 ## 授權
 

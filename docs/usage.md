@@ -8,7 +8,7 @@
 
 可透過 HACS 自訂儲存庫或 ZIP 安裝。
 
-1. HACS：「自訂儲存庫」加入 `https://github.com/yitsewu/hacs-taiwater`，類型選 Integration，下載後依正常流程重新啟動 HA。也可使用 ZIP，將完整 `custom_components/taiwater`（含 `models`）放入 HA `/config/custom_components/`。
+1. HACS：「自訂儲存庫」加入 `https://github.com/yitsewu/taiwan-water`，類型選 Integration，下載後依正常流程重新啟動 HA。也可使用 ZIP，將完整 `custom_components/taiwater`（含 `models`）放入 HA `/config/custom_components/`。
 2. 「設定 → 裝置與服務 → 新增整合 → 台灣自來水公司」，填水號、戶名及顯示名稱。首次查詢自動載入內建模型。
 3. 在整合選項調整排程、歷史期數、分攤方式及碳排係數。無需任何額外 OCR 安裝步驟。
 

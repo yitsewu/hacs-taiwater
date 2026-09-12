@@ -2,7 +2,7 @@ name: TaiWater OCR
 version: "0.1.1"
 slug: taiwater_ocr
 description: 在 HAOS 內部辨識台灣自來水驗證碼，不保存圖片或辨識結果。
-url: https://github.com/yitsewu/hacs-taiwater/tree/main/taiwater_ocr
+url: https://github.com/yitsewu/taiwan-water/tree/main/taiwater_ocr
 arch:
   - amd64
   - aarch64

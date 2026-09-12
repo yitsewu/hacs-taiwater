@@ -7,7 +7,7 @@
 HACS 只安裝 custom integration，不會安裝 HAOS 附加元件。請另外在 Home Assistant 的「設定 → 附加元件 → 附加元件商店 → 儲存庫」加入：
 
 ```text
-https://github.com/yitsewu/hacs-taiwater
+https://github.com/yitsewu/taiwan-water
 ```
 
 重新整理商店後安裝並啟動 **TaiWater OCR**。預設會隨系統啟動；Supervisor watchdog 會檢查 `/health`。

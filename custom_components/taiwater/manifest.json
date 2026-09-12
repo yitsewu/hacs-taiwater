@@ -4,10 +4,10 @@
   "codeowners": ["@yitsewu"],
   "config_flow": true,
   "dependencies": ["http", "recorder"],
-  "documentation": "https://github.com/yitsewu/hacs-taiwater",
+  "documentation": "https://github.com/yitsewu/taiwan-water",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/yitsewu/hacs-taiwater/issues",
+  "issue_tracker": "https://github.com/yitsewu/taiwan-water/issues",
   "requirements": ["numpy==2.3.2", "Pillow==12.3.0"],
   "version": "0.4.1"
 }

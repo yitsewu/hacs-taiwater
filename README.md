@@ -1,4 +1,4 @@
-# Taiwan Water / 台灣自來水公司帳單匯入
+# HACS - 台灣自來水公司帳單匯入
 
 [![台水實際查詢](https://github.com/yitsewu/taiwan-water/actions/workflows/live-check.yaml/badge.svg?branch=main)](https://github.com/yitsewu/taiwan-water/actions/workflows/live-check.yaml)
 

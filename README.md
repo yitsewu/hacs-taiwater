@@ -107,4 +107,5 @@
 
 ## 授權
 
-程式碼採用 [MIT License](LICENSE)。內建 OCR 模型沿用 ddddocr 的 [MIT 授權](custom_components/taiwater/models/LICENSE.ddddocr.txt)，並保留[來源與完整性資訊](custom_components/taiwater/models/source.json)。台水標誌權利歸台灣自來水公司所有，不包含在程式碼的 MIT 授權中。
+程式碼採用 [MIT License](LICENSE)。內建 OCR 模型沿用 ddddocr 的 [MIT 授權](custom_components/taiwater/models/LICENSE.ddddocr.txt)，並保留[來源與完整性資訊](custom_components/taiwater/models/source.json)。
+台水標誌權利歸台灣自來水公司所有，不包含在程式碼的 MIT 授權中。
